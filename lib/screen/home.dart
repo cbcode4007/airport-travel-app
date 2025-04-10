@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final json = jsonDecode(body);
     print('callFlightAPI converted reponse to json');
     
-    if(json.contains(flightNumber)) {
+    if(json.toString().contains((flightNumber))) {
       print('callFlightAPI succeeded in its entirety');
     }
     else {
@@ -65,13 +65,15 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     if (flightNumber != '') {      
-      if ((flightNumber.length > 2 && flightNumber.length < 7) && (flightNumberRegExp1.hasMatch(flightNumber) || flightNumberRegExp2.hasMatch(flightNumber) || flightNumberRegExp3.hasMatch(flightNumber) || flightNumberRegExp4.hasMatch(flightNumber))) {
-        _callFlightAPI(flightNumber);
-      }
-      else {
-        errorMessage = errorMessageFormat;
-        _spawnErrorMessage(errorMessage);
-      }
+      // if ((flightNumber.length > 2 && flightNumber.length < 7) && (flightNumberRegExp1.hasMatch(flightNumber) || flightNumberRegExp2.hasMatch(flightNumber) || flightNumberRegExp3.hasMatch(flightNumber) || flightNumberRegExp4.hasMatch(flightNumber))) {
+      //   _callFlightAPI(flightNumber);
+      // }
+      // else {
+      //   errorMessage = errorMessageFormat;
+      //   _spawnErrorMessage(errorMessage);
+      //   print(flightNumberRegExp4.hasMatch(flightNumber));
+      // }
+      _callFlightAPI(flightNumber);
     }
     else {
       errorMessage = errorMessageEmpty;
