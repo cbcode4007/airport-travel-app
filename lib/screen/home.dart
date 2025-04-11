@@ -2,6 +2,7 @@
 import 'dart:convert';
 // Translate raw JSON into Flight objects.
 import 'package:airport_travel_app/model/flight.dart';
+import 'package:airport_travel_app/screen/timer.dart';
 // Best practice for finding a key value in a list, i.e. if a flight number exists in the API response.
 import 'package:collection/collection.dart';
 // Material app design, or in other words Google recommendations for UI.
@@ -29,26 +30,30 @@ class _WelcomePageState extends State<WelcomePage> {
   // Controller for flight number text field extraction and clearing.
   final TextEditingController _controller = TextEditingController();
   // Regular expression to check correct format against user input flight number.
-  final flightNumberRegExp = RegExp(r'^[a-zA-Z]{3}\d{1,4}$');
+  final flightNumberRegExp = RegExp(r'^[a-zA-Z]{2,3}\d{1,4}$');
 
   // Calls the AviationStack API and returns a list of flights.
-  Future<List<Flight>> _callFlightAPI() async {
-  const key = 'c1a9697f9b6263fffcb12a94543e68fa';
-  const url = 'https://api.aviationstack.com/v1/flights?access_key=$key';
+  Future<Flight?> _callFlightAPI(String iata) async {
+    const key = 'c1a9697f9b6263fffcb12a94543e68fa';
+    String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
 
-  final uri = Uri.parse(url);
-  final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      final body = response.body;
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final data = json['data'] as List<dynamic>;
 
-  if (response.statusCode == 200) {
-    final body = response.body;
-    final json = jsonDecode(body) as Map<String, dynamic>;
-    final data = json['data'] as List<dynamic>;
-
-    return data.map((item) => Flight.fromJson(item)).toList();
-  } else {
-    throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
+      if (data.isNotEmpty) {
+        return Flight.fromJson(data.first);
+      } else {
+        return null;
+      }
+    } else {
+      throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
+    }
   }
-}
+
 
   // Validates the flight number a user enters.
   // First, it will see if anything was entered at all and relay a unique message for them to do so if not.
@@ -59,39 +64,31 @@ class _WelcomePageState extends State<WelcomePage> {
     const String errorMessageEmpty = 'You must enter a flight number to continue!';
     const String errorMessageFormat = 'The flight number you entered is invalid! Please use two or three letters at the front and one to four numbers behind them.';
     const String errorMessageCall = 'The flight number you entered could not be found! Please check and try again.';
-    const String errorMessageUnknown = 'Something went wrong fetching flights.';
 
     setState(() {
       errorMessage = '';
     });
 
     if (flightNumber != '') {
-      if ((flightNumber.length >= 4 && flightNumber.length <= 7) && (flightNumberRegExp.hasMatch(flightNumber))) {
+      if ((flightNumber.length >= 3 && flightNumber.length <= 7) && (flightNumberRegExp.hasMatch(flightNumber))) {
         
         try {
-          final flights = await _callFlightAPI();
-
+          final matchedFlight = await _callFlightAPI(flightNumber);
           if (!mounted) return;
 
-          final matchedFlight = flights.firstWhereOrNull(
-            (flight) => flight.flightNumber.toLowerCase() == flightNumber.toLowerCase(),
-          );
-
           if (matchedFlight != null) {
-            Navigator.pushNamed(
+            Navigator.push(
               context,
-              '/timer',
-              arguments: matchedFlight // Pass the Flight object
+              MaterialPageRoute(
+                builder: (context) => TimerPage(title: 'timer', flight: matchedFlight,),
+              )
             );
           } 
-          else {
-            errorMessage = errorMessageCall;
-            _spawnErrorMessage(errorMessage);            
-          }
+
         } 
         catch (e) {
-          errorMessage = errorMessageUnknown;
-          _spawnErrorMessage(errorMessage);   
+          errorMessage = errorMessageCall;
+          _spawnErrorMessage(errorMessage);  
         }
       }
       else {
@@ -107,7 +104,6 @@ class _WelcomePageState extends State<WelcomePage> {
 
   // Creates a visually striking error message tailored to the situation at the bottom of the screen.
   void _spawnErrorMessage (String error) {
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -230,6 +226,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
             ),
+            const SizedBox(height: 75)
           ],
         ),
       ),
