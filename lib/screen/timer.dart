@@ -1,94 +1,65 @@
 import 'dart:convert';
-import 'package:airport_travel_app/model/flight.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
-// This class is the configuration for the state. It holds the values (in this
-// case the title) provided by the parent (in this case the App widget) and
-// used by the build method of the State. Fields in a Widget subclass are
-// always marked "final".
-class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key, required this.title});
+class TimerPage extends StatefulWidget {
+  const TimerPage({super.key, required this.title});
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
   final String title;
+
   @override
-  State<WelcomePage> createState() => _WelcomePageState();
+  State<TimerPage> createState() => _TimerPageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> {
+class _TimerPageState extends State<TimerPage> {
   String errorMessage = '';
   final double fontSizeHeading = 27;
   final double fontSizeBody = 15;
   final TextEditingController _controller = TextEditingController();
-  final flightNumberRegExp = RegExp(r'^[a-zA-Z]{3}\d{1,4}$');
+  final flightNumberRegExp = RegExp(r'^[a-zA-Z]{2,3}\d{1,4}$');
 
-  // Future<Map<String, dynamic>> _callFlightAPI () async {
-  //   const key = 'c1a9697f9b6263fffcb12a94543e68fa';
-  //   const url = 'https://api.aviationstack.com/v1/flights?access_key=$key';
+  void _callFlightAPI (String flightNumber) async {
+    String errorMessageCall = 'The flight number you entered could not be found! Please check and try again.';
 
-  //   final uri = Uri.parse(url);
-  //   final response = await http.get(uri);
-  //   final body = response.body;
-  //   final json = jsonDecode(body) as Map<String, dynamic>;
-  //   return json;
-  // }
-
-  Future<List<Flight>> _callFlightAPI() async {
-  const key = 'c1a9697f9b6263fffcb12a94543e68fa';
-  const url = 'https://api.aviationstack.com/v1/flights?access_key=$key';
-
-  final uri = Uri.parse(url);
-  final response = await http.get(uri);
-
-  if (response.statusCode == 200) {
+    const key = 'c1a9697f9b6263fffcb12a94543e68fa';
+    const url = 'https://api.aviationstack.com/v1/flights?access_key=$key';
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
     final body = response.body;
-    final json = jsonDecode(body) as Map<String, dynamic>;
-    final data = json['data'] as List<dynamic>;
-
-    return data.map((item) => Flight.fromJson(item)).toList();
-  } else {
-    throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
+    final json = jsonDecode(body);
+    
+    if(json.toString().contains((flightNumber))) {
+      
+    }
+    else {
+      errorMessage = errorMessageCall;
+      _spawnErrorMessage(errorMessage);
+    }
   }
-}
 
-  void _validateFlightInput (String flightNumber) async {
-    const String errorMessageEmpty = 'You must enter a flight number to continue!';
-    const String errorMessageFormat = 'The flight number you entered is invalid! Please use two or three letters at the front and one to four numbers behind them.';
-    const String errorMessageCall = 'The flight number you entered could not be found! Please check and try again.';
-    const String errorMessageUnknown = 'Something went wrong fetching flights.';
+  void _validateFlightInput (String flightNumber) {
+    String errorMessageEmpty = 'You must enter a flight number to continue!';
+    String errorMessageFormat = 'The flight number you entered is invalid! Please use two or three letters at the front and one to four numbers behind them.';
 
     setState(() {
       errorMessage = '';
     });
 
     if (flightNumber != '') {
-      if ((flightNumber.length >= 4 && flightNumber.length <= 7) && (flightNumberRegExp.hasMatch(flightNumber))) {
-        
-        try {
-          final flights = await _callFlightAPI();
-
-          if (!mounted) return;
-
-          final matchedFlight = flights.firstWhereOrNull(
-            (flight) => flight.flightNumber.toLowerCase() == flightNumber.toLowerCase(),
-          );
-
-          if (matchedFlight != null) {
-            Navigator.pushNamed(
-              context,
-              '/timer',
-              arguments: matchedFlight // Pass the Flight object
-            );
-          } 
-          else {
-            errorMessage = errorMessageCall;
-            _spawnErrorMessage(errorMessage);            
-          }
-        } 
-        catch (e) {
-          errorMessage = errorMessageUnknown;
-          _spawnErrorMessage(errorMessage);   
+      if ((flightNumber.length > 1 && flightNumber.length < 7) && (flightNumberRegExp.hasMatch(flightNumber))) {
+        _callFlightAPI(flightNumber);
+        if (errorMessage == '') {
+          Navigator.pushNamed(context, '/timer');
         }
       }
       else {
@@ -152,7 +123,7 @@ class _WelcomePageState extends State<WelcomePage> {
       //   // the App.build method, and use it to set our appbar title.
       //   title: Text(widget.title),
       // ),
-      backgroundColor: Colors.lightBlue,  
+      backgroundColor: Colors.redAccent,  
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -213,7 +184,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.white)
                         ),
-                        hintText: 'AAA####',
+                        hintText: 'e.g. AA1, AA11, AA111, AA1111',
                         hintStyle: GoogleFonts.openSans(color: Colors.white70, fontSize: fontSizeBody)
                       ),
                     ),
@@ -242,6 +213,14 @@ class _WelcomePageState extends State<WelcomePage> {
           ],
         ),
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _incrementCounter,
+      //   tooltip: 'Submit the entered flight number',
+      //   child: Text(
+      //         'SUBMIT',
+      //         style: GoogleFonts.openSans(color: Colors.lightBlue, fontWeight: FontWeight.bold)
+      //       ),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
