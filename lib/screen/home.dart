@@ -1,8 +1,14 @@
+// Encode and decode JSON for processing.
 import 'dart:convert';
+// Translate raw JSON into Flight objects.
 import 'package:airport_travel_app/model/flight.dart';
+// Best practice for finding a key value in a list, i.e. if a flight number exists in the API response.
 import 'package:collection/collection.dart';
+// Material app design, or in other words Google recommendations for UI.
 import 'package:flutter/material.dart';
+// Open Sans Font.
 import 'package:google_fonts/google_fonts.dart';
+// API calls.
 import 'package:http/http.dart' as http;
 
 // This class is the configuration for the state. It holds the values (in this
@@ -16,24 +22,16 @@ class WelcomePage extends StatefulWidget {
   State<WelcomePage> createState() => _WelcomePageState();
 }
 
+// This class controls all of the logic for the state of this widget.
 class _WelcomePageState extends State<WelcomePage> {
+  // Initially empty error message String for later assignment.
   String errorMessage = '';
-  final double fontSizeHeading = 27;
-  final double fontSizeBody = 15;
+  // Controller for flight number text field extraction and clearing.
   final TextEditingController _controller = TextEditingController();
+  // Regular expression to check correct format against user input flight number.
   final flightNumberRegExp = RegExp(r'^[a-zA-Z]{3}\d{1,4}$');
 
-  // Future<Map<String, dynamic>> _callFlightAPI () async {
-  //   const key = 'c1a9697f9b6263fffcb12a94543e68fa';
-  //   const url = 'https://api.aviationstack.com/v1/flights?access_key=$key';
-
-  //   final uri = Uri.parse(url);
-  //   final response = await http.get(uri);
-  //   final body = response.body;
-  //   final json = jsonDecode(body) as Map<String, dynamic>;
-  //   return json;
-  // }
-
+  // Calls the AviationStack API and returns a list of flights.
   Future<List<Flight>> _callFlightAPI() async {
   const key = 'c1a9697f9b6263fffcb12a94543e68fa';
   const url = 'https://api.aviationstack.com/v1/flights?access_key=$key';
@@ -52,6 +50,11 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 }
 
+  // Validates the flight number a user enters.
+  // First, it will see if anything was entered at all and relay a unique message for them to do so if not.
+  // Then, it compares what the user entered to the RegEx which represents correct formatting.
+  // When all of that is verified, it will only now call the API to try and find the flight number in there.
+  // Finally, once it does find a flight number in the API, it will proceed to the next page with that flight's data.
   void _validateFlightInput (String flightNumber) async {
     const String errorMessageEmpty = 'You must enter a flight number to continue!';
     const String errorMessageFormat = 'The flight number you entered is invalid! Please use two or three letters at the front and one to four numbers behind them.';
@@ -102,6 +105,7 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
+  // Creates a visually striking error message tailored to the situation at the bottom of the screen.
   void _spawnErrorMessage (String error) {
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -136,22 +140,8 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    // This method is rerun every time setState is called.
     return Scaffold(
-      // appBar: AppBar(
-      //   // TRY THIS: Try changing the color here to a specific color (to
-      //   // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-      //   // change color while the other colors stay the same.
-      //   backgroundColor: Colors.amber,
-      //   // Here we take the value from the MyHomePage object that was created by
-      //   // the App.build method, and use it to set our appbar title.
-      //   title: Text(widget.title),
-      // ),
       backgroundColor: Colors.lightBlue,  
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -165,13 +155,10 @@ class _WelcomePageState extends State<WelcomePage> {
           // how it positions its children. Here we use mainAxisAlignment to
           // center the children vertically; the main axis here is the vertical
           // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.          
+          // horizontal).         
           mainAxisAlignment: MainAxisAlignment.center, 
           children: <Widget>[
+            // Presents a given logo image at a specific size and uniform aspect ratio in a formatted circle.
             ClipRRect(
               borderRadius: BorderRadius.circular(100.0),
               child: Container(
@@ -185,26 +172,29 @@ class _WelcomePageState extends State<WelcomePage> {
                 )                  
               )
             ),
+            // Welcome heading.
             SizedBox(
               height: 70,
               child: Text(
                 'Welcome!',
-                style: GoogleFonts.openSans(color:Colors.white, fontWeight: FontWeight.bold, fontSize: fontSizeHeading)
+                style: GoogleFonts.openSans(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 27)
               )          
             ), 
             Column(
               children: [
+                // Flight number prompt.
                 Text(
                   'Please enter your flight number below.',
-                  style: GoogleFonts.openSans(color: Colors.white, fontSize: fontSizeBody)
+                  style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
                 ),
+                // Flight number entry area.
                 Container(
                   margin: const EdgeInsets.all(20.0),
                   child: SizedBox(
                     width: 280,
                     child: TextField(
                       controller: _controller,
-                      style: GoogleFonts.openSans(color: Colors.white, fontSize: fontSizeBody),
+                      style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                       cursorColor: Colors.white,
                       decoration: InputDecoration(
                         enabledBorder: const OutlineInputBorder(
@@ -214,13 +204,14 @@ class _WelcomePageState extends State<WelcomePage> {
                           borderSide: BorderSide(color: Colors.white)
                         ),
                         hintText: 'AAA####',
-                        hintStyle: GoogleFonts.openSans(color: Colors.white70, fontSize: fontSizeBody)
+                        hintStyle: GoogleFonts.openSans(color: Colors.white70, fontSize: 15)
                       ),
                     ),
                   ),
                 ),
               ],
             ),
+            // Flight number submission button which will call for validation and clear what was typed.
             TextButton(
               onPressed: () {                
                 _validateFlightInput(_controller.text);
@@ -233,7 +224,7 @@ class _WelcomePageState extends State<WelcomePage> {
               child: Text(
                 'SUBMIT',
                 style: GoogleFonts.openSans(
-                fontSize: fontSizeBody,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: Colors.lightBlue,
                 ),
