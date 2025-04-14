@@ -15,15 +15,15 @@ import 'package:http/http.dart' as http;
 // case the title) provided by the parent (in this case the App widget) and
 // used by the build method of the State. Fields in a Widget subclass are
 // always marked "final".
-class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key, required this.title});
+class PassportPage extends StatefulWidget {
+  const PassportPage({super.key, required this.title});
   final String title;
   @override
-  State<WelcomePage> createState() => _WelcomePageState();
+  State<PassportPage> createState() => _PassportPageState();
 }
 
 // This class controls all of the logic for the state of this widget.
-class _WelcomePageState extends State<WelcomePage> {
+class _PassportPageState extends State<PassportPage> {
   // Initially empty error message String for later assignment.
   String errorMessage = '';
   // Controller for flight number text field extraction and clearing.
