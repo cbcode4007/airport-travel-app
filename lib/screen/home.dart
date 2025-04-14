@@ -1,10 +1,9 @@
 // Encode and decode JSON for processing.
 import 'dart:convert';
+// Route to the next screen.
+import 'package:airport_travel_app/screen/timer.dart';
 // Translate raw JSON into Flight objects.
 import 'package:airport_travel_app/model/flight.dart';
-import 'package:airport_travel_app/screen/timer.dart';
-// Best practice for finding a key value in a list, i.e. if a flight number exists in the API response.
-import 'package:collection/collection.dart';
 // Material app design, or in other words Google recommendations for UI.
 import 'package:flutter/material.dart';
 // Open Sans Font.
@@ -32,28 +31,51 @@ class _WelcomePageState extends State<WelcomePage> {
   // Regular expression to check correct format against user input flight number.
   final flightNumberRegExp = RegExp(r'^[a-zA-Z]{2,3}\d{1,4}$');
 
-  // Calls the AviationStack API and returns a list of flights.
+  // Calls the AviationStack API and returns a flight that matches the key given.
+  // Future<Flight?> _callFlightAPI(String iata) async {
+  //   const key = 'c1a9697f9b6263fffcb12a94543e68fa';
+  //   String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
+  //   final uri = Uri.parse(url);
+  //   final response = await http.get(uri);
+
+  //   if (response.statusCode == 200) {
+  //     final body = response.body;
+  //     final json = jsonDecode(body) as Map<String, dynamic>;
+  //     final data = json['data'] as List<dynamic>;
+
+  //     if (data.isNotEmpty) {
+  //       return Flight.fromJson(data.first);
+  //     } else {
+  //       return null;
+  //     }
+  //   } else {
+  //     throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
+  //   }
+  // }
   Future<Flight?> _callFlightAPI(String iata) async {
-    const key = 'c1a9697f9b6263fffcb12a94543e68fa';
-    String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
-    final uri = Uri.parse(url);
-    final response = await http.get(uri);
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    if (response.statusCode == 200) {
-      final body = response.body;
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final data = json['data'] as List<dynamic>;
-
-      if (data.isNotEmpty) {
-        return Flight.fromJson(data.first);
-      } else {
-        return null;
+    // Mock flight data similar to what the real API returns
+    final mockJson = {
+      "flight": {
+        "iata": "WZ7905",
+        "icao": "WZZ7905",
+      },
+      "departure": {
+        "iata": "KUT",
+        "airport": "Kopitnari",
+        "estimated": "2025-04-14T11:57:00+00:00",
+      },
+      "arrival": {
+        "iata": "LCA",
+        "airport": "Larnaca",
+        "scheduled": "2025-04-12T19:00:00+00:00",
       }
-    } else {
-      throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
-    }
-  }
+    };
 
+    return Flight.fromJson(mockJson);
+  }
 
   // Validates the flight number a user enters.
   // First, it will see if anything was entered at all and relay a unique message for them to do so if not.

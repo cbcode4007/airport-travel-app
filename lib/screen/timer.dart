@@ -27,6 +27,10 @@ class TimerPage extends StatefulWidget {
 class _TimerPageState extends State<TimerPage> {
   // Initially empty error message String for later assignment.
   String errorMessage = '';
+  //
+  String _priority = '';
+  // Background colour which changes at certain times.
+  Color? _color = Colors.red[400];
 
   late Timer _clockTimer;
   late String _currentTime = DateFormat.Hm().format(DateTime.now());
@@ -41,7 +45,7 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   void _startClock() {
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 0), () {
       if (!mounted) return;
 
       _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -51,30 +55,29 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   void _updateTime() {
-    // Convert now into airport timezone?
-
     final now = DateTime.now();
     _date = DateFormat.yMd().format(now);
-
-    DateTime departDateLocal = DateTime.parse(widget.flight.departDate.toIso8601String()).toLocal();
-
-    Duration difference = departDateLocal.toUtc().difference(now.toLocal());
-    // Duration difference = now.difference(widget.flight.departDate);
-
-    DateTime departDate = widget.flight.departDate.toLocal();
-    DateTime departDateUTC = widget.flight.departDate.toUtc();
-    DateTime nowUTC = now.toUtc();
-    DateTime nowLocal = now.toLocal();
-    print('Dep UTC:    $departDateUTC');
-    print('Dep no UTC: $departDateLocal');
-    print('Now UTC:    $nowUTC');
-    print('Now no UTC: $nowLocal');
-    print(difference);
-    print(widget.flight.flightIcao);
+    // Format raw json departure date and time for timer (workaround using a standard universal date format for API)
+    // Remove UTC offset from string data
+    String departDateString = widget.flight.departDate.toString().substring(0,19);
+    // Send back to date for operations with current time
+    DateTime departDate = DateTime.parse(departDateString);
+    // Calculate time until flight
+    Duration difference = departDate.difference(now);
 
     setState(() {
       _currentTime = DateFormat.Hm().format(now);
       _departureTime = _printDuration(difference);
+      _color = Colors.red[400];
+      _priority = 'Priority 3';
+      if (difference.inMinutes < 90)  {
+        _color = Colors.yellow[800];
+        _priority = 'Priority 2';
+      }
+      if (difference.inMinutes < 45) {
+        _color = Colors.greenAccent[700];
+        _priority = 'Priority 1';
+      }
     });
   }
 
@@ -100,7 +103,7 @@ class _TimerPageState extends State<TimerPage> {
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called.
     return Scaffold(
-      backgroundColor: Colors.red[400],  
+      backgroundColor: _color,  
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -128,7 +131,7 @@ class _TimerPageState extends State<TimerPage> {
             ),
             const SizedBox(height: 5),
             Text(
-              'Your priority status is Priority 3.',
+              'Your priority status is $_priority.',
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
             ),
             const SizedBox(height: 60),
