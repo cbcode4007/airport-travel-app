@@ -32,8 +32,6 @@ class TimerPage extends StatefulWidget {
 // This class controls all of the logic for the state of this widget.
 class _TimerPageState extends State<TimerPage> {
   // Variables to be updated in code later.
-  // Initially empty error message String for later assignment.
-  String errorMessage = 'Loading...';
   // Initialize information displays.
   String priority = 'Your priority status is Priority 3';
   String departTime = 'Loading...';
@@ -115,7 +113,7 @@ class _TimerPageState extends State<TimerPage> {
     return "$negativeSign${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 
-  void _backToWelcome() {
+  void _welcome() {
     Navigator.pushNamed(context, '/');
   }
 
@@ -123,7 +121,7 @@ class _TimerPageState extends State<TimerPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PassportPage(title: 'passport',),
+        builder: (context) => PassportPage(title: 'passport', flight: widget.flight,),
       )
     );
   }
@@ -135,12 +133,13 @@ class _TimerPageState extends State<TimerPage> {
       backgroundColor: _color,  
       body: Center(
         child: Column(      
-          mainAxisAlignment: MainAxisAlignment.center, 
+          mainAxisAlignment: MainAxisAlignment.start,
+          verticalDirection: VerticalDirection.down,
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(onPressed: _backToWelcome, icon: const Icon(Icons.arrow_back), color: Colors.white,),
+                IconButton(onPressed: _welcome, icon: const Icon(Icons.arrow_back), color: Colors.white,),
                 IconButton(onPressed: _passport, icon: const Icon(Icons.badge), color: Colors.white,),
               ],
             ),
@@ -159,7 +158,7 @@ class _TimerPageState extends State<TimerPage> {
               '$priority.',
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
             ),
-            const SizedBox(height: 60),
+            const SizedBox(height: 15),
             Text(
               'Flight Details for ${widget.flight.flightIata} ($date)',
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
@@ -194,7 +193,7 @@ class _TimerPageState extends State<TimerPage> {
                         ),
                       ],
                     ),
-
+                    const SizedBox(height: 5),
                     Row(
                       children: [
                         Text(
@@ -234,6 +233,7 @@ class _TimerPageState extends State<TimerPage> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 5),
                     Row(
                       children: [
                         Text(
@@ -246,7 +246,7 @@ class _TimerPageState extends State<TimerPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 50),  
+            const SizedBox(height: 75),  
           ],
         ),
       ),

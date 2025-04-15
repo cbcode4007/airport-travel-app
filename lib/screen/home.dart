@@ -65,12 +65,12 @@ class _WelcomePageState extends State<WelcomePage> {
       "departure": {
         "iata": "KUT",
         "airport": "Kopitnari",
-        "estimated": "2025-04-14T14:16:00+00:00",
+        "estimated": "2025-04-15T17:00:00+00:00",
       },
       "arrival": {
         "iata": "LCA",
         "airport": "Larnaca",
-        "scheduled": "2025-04-14T19:00:00+00:00",
+        "scheduled": "2025-04-16T01:00:00+00:00",
       }
     };
 
