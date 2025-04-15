@@ -10,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // Date manipulation.
 import 'package:intl/intl.dart';
+// Timezone abbreviation display.
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -39,6 +42,8 @@ class _TimerPageState extends State<TimerPage> {
   String date = DateFormat.yMMMMd().format(DateTime.now());
   String currentTime = DateFormat.Hm().format(DateTime.now());
   String departTimer = 'Loading...';
+  String departCode = '';
+  String arriveCode = '';
   
   // Initialize the background colour which changes at certain times.
   Color? _color = Colors.red[400];
@@ -50,6 +55,7 @@ class _TimerPageState extends State<TimerPage> {
     super.initState();
     _startClock();
     _updateTime();
+    tz.initializeTimeZones();
   }
 
   void _startClock() {
@@ -95,7 +101,9 @@ class _TimerPageState extends State<TimerPage> {
       currentTime = DateFormat.jm().format(DateTime.now());
       departTimer = _printDuration(difference);
       departTime = DateFormat.jm().format(departDate);
+      departCode = getAbbreviation(departDate, widget.flight.departTimezone);
       arriveTime = DateFormat.jm().format(arriveDate);
+      arriveCode = getAbbreviation(arriveDate, widget.flight.arriveTimezone);
     });
   }
 
@@ -112,6 +120,13 @@ class _TimerPageState extends State<TimerPage> {
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60).abs());
     return "$negativeSign${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
+
+  String getAbbreviation(DateTime utcTime, String timeZone) {
+    final location = tz.getLocation(timeZone);
+    final tzTime = tz.TZDateTime.from(utcTime, location);
+    return tzTime.timeZoneName;
+  }
+
 
   void _welcome() {
     Navigator.pushNamed(context, '/');
@@ -158,12 +173,12 @@ class _TimerPageState extends State<TimerPage> {
               '$priority.',
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 25),
             Text(
               'Flight Details for ${widget.flight.flightIata} ($date)',
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 15),
             Row (
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -197,7 +212,7 @@ class _TimerPageState extends State<TimerPage> {
                     Row(
                       children: [
                         Text(
-                          '$departTime (local)',
+                          '$departTime $departCode',
                           style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
                         ),
                       ],
@@ -237,7 +252,7 @@ class _TimerPageState extends State<TimerPage> {
                     Row(
                       children: [
                         Text(
-                          '$arriveTime (local)',
+                          '$arriveTime $arriveCode',
                           style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
                         ),
                       ],

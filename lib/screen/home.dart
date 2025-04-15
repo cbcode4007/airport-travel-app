@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // API calls.
 import 'package:http/http.dart' as http;
+// Window sizing for visualising mobile display, temporary.
+import 'package:window_manager/window_manager.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -30,6 +32,14 @@ class _WelcomePageState extends State<WelcomePage> {
   final TextEditingController _controller = TextEditingController();
   // Regular expression to check correct format against user input flight number.
   final flightNumberRegExp = RegExp(r'^[a-zA-Z]{2,3}\d{1,4}$');
+  // Manager of the desktop environment's sizing.
+  final wm = WindowManager.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    wm.setAspectRatio(9 / 16);
+  }
 
   // Calls the AviationStack API and returns a flight that matches the key given.
   // Future<Flight?> _callFlightAPI(String iata) async {
@@ -63,14 +73,16 @@ class _WelcomePageState extends State<WelcomePage> {
         "icao": "WZZ7905",
       },
       "departure": {
-        "iata": "KUT",
-        "airport": "Kopitnari",
-        "estimated": "2025-04-15T17:00:00+00:00",
+        "iata": "YYZ",
+        "airport": "Toronto Pearson",
+        "estimated": "2025-04-15T18:00:00+00:00",
+        "timezone": "America/Toronto",
       },
       "arrival": {
-        "iata": "LCA",
-        "airport": "Larnaca",
-        "scheduled": "2025-04-16T01:00:00+00:00",
+        "iata": "CDG",
+        "airport": "Charles de Gaulle",
+        "scheduled": "2025-04-16T07:00:00+00:00",
+        "timezone": "Europe/Paris",
       }
     };
 
@@ -164,92 +176,95 @@ class _WelcomePageState extends State<WelcomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).         
-          mainAxisAlignment: MainAxisAlignment.center, 
-          children: <Widget>[
-            // Presents a given logo image at a specific size and uniform aspect ratio in a formatted circle.
-            ClipRRect(
-              borderRadius: BorderRadius.circular(100.0),
-              child: Container(
-                height: 100,
-                width: 100,
-                decoration: const BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/logo.png')
-                  )
-                )                  
-              )
-            ),
-            // Welcome heading.
-            SizedBox(
-              height: 70,
-              child: Text(
-                'Welcome!',
-                style: GoogleFonts.openSans(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 27)
-              )          
-            ), 
-            Column(
-              children: [
-                // Flight number prompt.
-                Text(
-                  'Please enter your flight number below.',
-                  style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-                ),
-                // Flight number entry area.
-                Container(
-                  margin: const EdgeInsets.all(20.0),
-                  child: SizedBox(
-                    width: 280,
-                    child: TextField(
-                      controller: _controller,
-                      style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                      cursorColor: Colors.white,
-                      decoration: InputDecoration(
-                        enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white70)
+        child: AspectRatio(
+          aspectRatio: 9 / 16,
+          child: Column(
+            // Column is also a layout widget. It takes a list of children and
+            // arranges them vertically. By default, it sizes itself to fit its
+            // children horizontally, and tries to be as tall as its parent.
+            //
+            // Column has various properties to control how it sizes itself and
+            // how it positions its children. Here we use mainAxisAlignment to
+            // center the children vertically; the main axis here is the vertical
+            // axis because Columns are vertical (the cross axis would be
+            // horizontal).         
+            mainAxisAlignment: MainAxisAlignment.center, 
+            children: <Widget>[
+              // Presents a given logo image at a specific size and uniform aspect ratio in a formatted circle.
+              ClipRRect(
+                borderRadius: BorderRadius.circular(100.0),
+                child: Container(
+                  height: 100,
+                  width: 100,
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/logo.png')
+                    )
+                  )                  
+                )
+              ),
+              // Welcome heading.
+              SizedBox(
+                height: 70,
+                child: Text(
+                  'Welcome!',
+                  style: GoogleFonts.openSans(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 27)
+                )          
+              ), 
+              Column(
+                children: [
+                  // Flight number prompt.
+                  Text(
+                    'Please enter your flight number below.',
+                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
+                  ),
+                  // Flight number entry area.
+                  Container(
+                    margin: const EdgeInsets.all(20.0),
+                    child: SizedBox(
+                      width: 280,
+                      child: TextField(
+                        controller: _controller,
+                        style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                        cursorColor: Colors.white,
+                        decoration: InputDecoration(
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white70)
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white)
+                          ),
+                          hintText: 'AAA####',
+                          hintStyle: GoogleFonts.openSans(color: Colors.white70, fontSize: 15)
                         ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white)
-                        ),
-                        hintText: 'AAA####',
-                        hintStyle: GoogleFonts.openSans(color: Colors.white70, fontSize: 15)
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            // Flight number submission button which will call for validation and clear what was typed.
-            TextButton(
-              onPressed: () {                
-                _validateFlightInput(_controller.text);
-                _controller.clear();
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.white,
-                fixedSize: const Size(150, 40)
+                ],
               ),
-              child: Text(
-                'SUBMIT',
-                style: GoogleFonts.openSans(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.lightBlue,
+              // Flight number submission button which will call for validation and clear what was typed.
+              TextButton(
+                onPressed: () {                
+                  _validateFlightInput(_controller.text);
+                  _controller.clear();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  fixedSize: const Size(150, 40)
+                ),
+                child: Text(
+                  'SUBMIT',
+                  style: GoogleFonts.openSans(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 75)
-          ],
+              const SizedBox(height: 75)
+            ],
+          ),
         ),
       ),
     );

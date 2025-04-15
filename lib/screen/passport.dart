@@ -16,7 +16,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
 
-
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
 // used by the build method of the State. Fields in a Widget subclass are
@@ -112,7 +111,7 @@ class _PassportPageState extends State<PassportPage> {
     if (path != null && await File(path).exists()) {
       setState(() {
         _passportImage = File(path);
-        fileUploadStatus = 'Passport uploaded. Tap to replace.';
+        fileUploadStatus = 'Tap on your password to replace it.';
       });
     }
   }
@@ -131,7 +130,7 @@ class _PassportPageState extends State<PassportPage> {
 
     setState(() {
       _passportImage = newImage;
-      fileUploadStatus = 'Passport uploaded. Tap to replace.';
+      fileUploadStatus = 'Tap on your password to replace it.';
     });
   }
 
@@ -158,7 +157,7 @@ class _PassportPageState extends State<PassportPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Passport Image'),
-        content: const Text('Are you sure you want to delete this image?'),
+        content: const Text('Are you sure you want to delete this image from the app?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),

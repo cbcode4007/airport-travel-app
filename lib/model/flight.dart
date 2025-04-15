@@ -7,8 +7,10 @@ class Flight {
   final String arriveName;
   final DateTime departDate;
   final DateTime arriveDate;
+  final String departTimezone;
+  final String arriveTimezone;
 
-  Flight({required this.flightIata, required this.flightIcao, required this.departNumber, required this.arriveNumber, required this.departName, required this.arriveName, required this.departDate, required this.arriveDate,});
+  Flight({required this.flightIata, required this.flightIcao, required this.departNumber, required this.arriveNumber, required this.departName, required this.arriveName, required this.departDate, required this.arriveDate, required this.departTimezone, required this.arriveTimezone});
 
   factory Flight.fromJson(Map<String, dynamic> json) {
     return Flight(
@@ -20,6 +22,8 @@ class Flight {
       arriveName: json['arrival']['airport'] ?? '',
       departDate: DateTime.tryParse(json['departure']['estimated'] ?? '') ?? DateTime(0),
       arriveDate: DateTime.tryParse(json['arrival']['scheduled'] ?? '') ?? DateTime(0),
+      departTimezone: json['departure']['timezone'] ?? '',
+      arriveTimezone: json['arrival']['timezone'] ?? '',
     );
   }
 
@@ -33,6 +37,8 @@ class Flight {
       'arriveName': arriveName,
       'departDate': departDate.toIso8601String(),
       'arriveDate': arriveDate.toIso8601String(),
+      'departTimezone': departTimezone,
+      'arriveTimezone': arriveTimezone,
     };
   }
 }
