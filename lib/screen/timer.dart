@@ -16,7 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 // Advertisements.
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -55,7 +55,7 @@ class _TimerPageState extends State<TimerPage> {
   late Timer _clockTimer;
 
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
-  BannerAd? _bannerAd;
+  // BannerAd? _bannerAd;
   bool _isAdLoaded = false;
 
   @override
@@ -65,24 +65,24 @@ class _TimerPageState extends State<TimerPage> {
 
     // Try to initialize an ad unit to be displayed in ad widgets.
     // Only initialize ads on supported platforms.
-    if (Platform.isAndroid || Platform.isIOS) {
-      _bannerAd = BannerAd(
-        adUnitId: 'ca-app-pub-3940256099942544/6300978111',
-        size: AdSize.banner,
-        request: AdRequest(),
-        listener: BannerAdListener(
-          onAdLoaded: (Ad ad) {
-            setState(() {
-              _isAdLoaded = true;
-            });
-          },
-          onAdFailedToLoad: (Ad ad, LoadAdError error) {
-            ad.dispose();
-            print('BannerAd failed to load: $error');
-          },
-        ),
-      )..load();
-    }
+    // if (Platform.isAndroid || Platform.isIOS) {
+    //   _bannerAd = BannerAd(
+    //     adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+    //     size: AdSize.banner,
+    //     request: AdRequest(),
+    //     listener: BannerAdListener(
+    //       onAdLoaded: (Ad ad) {
+    //         setState(() {
+    //           _isAdLoaded = true;
+    //         });
+    //       },
+    //       onAdFailedToLoad: (Ad ad, LoadAdError error) {
+    //         ad.dispose();
+    //         print('BannerAd failed to load: $error');
+    //       },
+    //     ),
+    //   )..load();
+    // }
 
     _startClock();
     _updateTime();
@@ -180,11 +180,12 @@ class _TimerPageState extends State<TimerPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           verticalDirection: VerticalDirection.down,
           children: <Widget>[
+            const SizedBox(height: 25),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(onPressed: _welcome, icon: const Icon(Icons.arrow_back), color: Colors.white,),
-                IconButton(onPressed: _passport, icon: const Icon(Icons.badge), color: Colors.white,),
+                IconButton(onPressed: _welcome, icon: const Icon(Icons.arrow_back), color: Colors.white, iconSize: 50),
+                IconButton(onPressed: _passport, icon: const Icon(Icons.badge), color: Colors.white, iconSize: 50),
               ],
             ),
             const SizedBox(height: 125),
@@ -192,7 +193,7 @@ class _TimerPageState extends State<TimerPage> {
               departTimer,
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 60, fontWeight: FontWeight.bold)
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 5),
             Text(
               'Currently, it is $currentTime.',
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
@@ -204,8 +205,12 @@ class _TimerPageState extends State<TimerPage> {
             ),
             const SizedBox(height: 25),
             Text(
-              'Flight Details for ${widget.flight.flightIata} ($date)',
+              'Flight Details for ${widget.flight.flightIata}',
               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
+            ),
+            Text(
+               '($date)',
+               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
             ),
             const SizedBox(height: 15),
             Row (
@@ -290,12 +295,12 @@ class _TimerPageState extends State<TimerPage> {
                 ),
               ],
             ),
-            if (_isAdLoaded) 
-              Container(
-                width: _bannerAd!.size.width.toDouble(),
-                height: _bannerAd!.size.height.toDouble(),
-                child: AdWidget(ad: _bannerAd!),
-              ),
+            // if (_isAdLoaded) 
+            //   Container(
+            //     width: _bannerAd!.size.width.toDouble(),
+            //     height: _bannerAd!.size.height.toDouble(),
+            //     child: AdWidget(ad: _bannerAd!),
+            //   ),
             const SizedBox(height: 75),  
           ],
         ),

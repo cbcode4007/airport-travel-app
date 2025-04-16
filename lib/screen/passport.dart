@@ -179,6 +179,7 @@ class _PassportPageState extends State<PassportPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           verticalDirection: VerticalDirection.down,
           children: <Widget>[
+            const SizedBox(height: 25),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -186,6 +187,7 @@ class _PassportPageState extends State<PassportPage> {
                   onPressed: _timer,
                   icon: const Icon(Icons.arrow_back),
                   color: Colors.white,
+                  iconSize: 50,
                 ),
               ],
             ),
@@ -223,7 +225,7 @@ class _PassportPageState extends State<PassportPage> {
                           child: const SizedBox(
                             height: 385,
                             width: 275,
-                            child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 50)
+                            child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 75)
                           ),
                         ),
                       ],

@@ -16,3 +16,9 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+// Dots producing error
+// android {
+//     compileSdk = 35
+//     ...
+// }

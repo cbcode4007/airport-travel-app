@@ -38,7 +38,6 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void initState() {
     super.initState();
-    wm.setAspectRatio(9 / 16);
   }
 
   // Calls the AviationStack API and returns a flight that matches the key given.
@@ -122,22 +121,22 @@ class _WelcomePageState extends State<WelcomePage> {
         } 
         catch (e) {
           errorMessage = errorMessageCall;
-          _spawnErrorMessage(errorMessage);  
+          _spawnErrorMessage(errorMessage, 150);  
         }
       }
       else {
         errorMessage = errorMessageFormat;
-        _spawnErrorMessage(errorMessage);
+        _spawnErrorMessage(errorMessage, 150);
       }
     }
     else {
       errorMessage = errorMessageEmpty;
-      _spawnErrorMessage(errorMessage);
+      _spawnErrorMessage(errorMessage, 100);
     }
   }
 
   // Creates a visually striking error message tailored to the situation at the bottom of the screen.
-  void _spawnErrorMessage (String error) {
+  void _spawnErrorMessage (String error, double height) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -145,7 +144,7 @@ class _WelcomePageState extends State<WelcomePage> {
         elevation: 0,
         content: Container(
           padding: const EdgeInsets.all(8),
-          height: 90,
+          height: height,
           decoration: const BoxDecoration(
             color: Color(0xFFC72C41),
             borderRadius: BorderRadius.all(Radius.circular(20))
@@ -188,7 +187,7 @@ class _WelcomePageState extends State<WelcomePage> {
             // center the children vertically; the main axis here is the vertical
             // axis because Columns are vertical (the cross axis would be
             // horizontal).         
-            mainAxisAlignment: MainAxisAlignment.center, 
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               // Presents a given logo image at a specific size and uniform aspect ratio in a formatted circle.
               ClipRRect(
@@ -205,18 +204,20 @@ class _WelcomePageState extends State<WelcomePage> {
                 )
               ),
               // Welcome heading.
-              SizedBox(
-                height: 70,
-                child: Text(
-                  'Welcome!',
-                  style: GoogleFonts.openSans(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 27)
-                )          
-              ), 
+              Text(
+                'Welcome!',
+                style: GoogleFonts.openSans(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 27)
+              ),
+              const SizedBox(height: 25),  
               Column(
                 children: [
                   // Flight number prompt.
                   Text(
-                    'Please enter your IATA flight number below.',
+                    'Please enter your',
+                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
+                  ),
+                  Text(
+                    'IATA flight number below.',
                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
                   ),
                   // Flight number entry area.
