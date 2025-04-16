@@ -1,5 +1,7 @@
 // Future class for asynchronous updating.
 import 'dart:async';
+// Platform detection.
+import 'dart:io';
 // Route to the next screen.
 import 'package:airport_travel_app/screen/passport.dart';
 // Flight data.
@@ -13,6 +15,8 @@ import 'package:intl/intl.dart';
 // Timezone abbreviation display.
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+// Advertisements.
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -50,12 +54,38 @@ class _TimerPageState extends State<TimerPage> {
   // Initialize the timer for constant updating of the program.
   late Timer _clockTimer;
 
+  // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
   @override
   void initState() {
     super.initState();
+    tz.initializeTimeZones();
+
+    // Try to initialize an ad unit to be displayed in ad widgets.
+    // Only initialize ads on supported platforms.
+    if (Platform.isAndroid || Platform.isIOS) {
+      _bannerAd = BannerAd(
+        adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+        size: AdSize.banner,
+        request: AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (Ad ad) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (Ad ad, LoadAdError error) {
+            ad.dispose();
+            print('BannerAd failed to load: $error');
+          },
+        ),
+      )..load();
+    }
+
     _startClock();
     _updateTime();
-    tz.initializeTimeZones();
   }
 
   void _startClock() {
@@ -107,12 +137,6 @@ class _TimerPageState extends State<TimerPage> {
     });
   }
 
-  @override
-  void dispose() {
-    _clockTimer.cancel();
-    super.dispose();
-  }
-
   String _printDuration(Duration duration) {
     String negativeSign = duration.isNegative ? '-' : '';
     String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -127,6 +151,11 @@ class _TimerPageState extends State<TimerPage> {
     return tzTime.timeZoneName;
   }
 
+  @override
+  void dispose() {
+    _clockTimer.cancel();
+    super.dispose();
+  }
 
   void _welcome() {
     Navigator.pushNamed(context, '/');
@@ -261,6 +290,12 @@ class _TimerPageState extends State<TimerPage> {
                 ),
               ],
             ),
+            if (_isAdLoaded) 
+              Container(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
             const SizedBox(height: 75),  
           ],
         ),

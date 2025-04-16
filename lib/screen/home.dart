@@ -75,13 +75,13 @@ class _WelcomePageState extends State<WelcomePage> {
       "departure": {
         "iata": "YYZ",
         "airport": "Toronto Pearson",
-        "estimated": "2025-04-15T18:00:00+00:00",
+        "estimated": "2025-04-16T17:00:00+00:00",
         "timezone": "America/Toronto",
       },
       "arrival": {
         "iata": "CDG",
         "airport": "Charles de Gaulle",
-        "scheduled": "2025-04-16T07:00:00+00:00",
+        "scheduled": "2025-04-16T05:00:00+00:00",
         "timezone": "Europe/Paris",
       }
     };
@@ -216,7 +216,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 children: [
                   // Flight number prompt.
                   Text(
-                    'Please enter your flight number below.',
+                    'Please enter your IATA flight number below.',
                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
                   ),
                   // Flight number entry area.
