@@ -73,14 +73,14 @@ class _WelcomePageState extends State<WelcomePage> {
       },
       "departure": {
         "iata": "YYZ",
-        "airport": "Toronto Pearson",
-        "estimated": "2025-04-16T17:00:00+00:00",
+        "airport": "Toronto",
+        "estimated": "2025-04-17T17:00:00+00:00",
         "timezone": "America/Toronto",
       },
       "arrival": {
         "iata": "CDG",
         "airport": "Charles de Gaulle",
-        "scheduled": "2025-04-16T05:00:00+00:00",
+        "scheduled": "2025-04-17T05:00:00+00:00",
         "timezone": "Europe/Paris",
       }
     };

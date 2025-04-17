@@ -40,12 +40,12 @@ class TimerPage extends StatefulWidget {
 class _TimerPageState extends State<TimerPage> {
   // Variables to be updated in code later.
   // Initialize information displays.
-  String priority = 'Your priority status is Priority 3';
-  String departTime = 'Loading...';
-  String arriveTime = 'Loading...';
+  String priority = '';
+  String departTime = '';
+  String arriveTime = '';
   String date = DateFormat.yMMMMd().format(DateTime.now());
   String currentTime = DateFormat.Hm().format(DateTime.now());
-  String departTimer = 'Loading...';
+  String departTimer = '';
   String departCode = '';
   String arriveCode = '';
   
@@ -57,6 +57,8 @@ class _TimerPageState extends State<TimerPage> {
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
   // BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+
+  bool _isReady = false;
 
   @override
   void initState() {
@@ -115,17 +117,18 @@ class _TimerPageState extends State<TimerPage> {
     DateTime arriveDate = DateTime.parse(arriveDateString);
 
     setState(() {
+      priority = 'Your priority status is Priority 3.';
       if (difference.inMinutes < 90)  {
         _color = Colors.amberAccent[700];
-        priority = 'Your priority status is Priority 2';
+        priority = 'Your priority status is Priority 2.';
       }
       if (difference.inMinutes < 45) {
         _color = Colors.greenAccent[700];
-        priority = 'Your priority status is Priority 1';
+        priority = 'Your priority status is Priority 1.';
       }
       if (difference.inMinutes < 1 && difference.inSeconds < 1) {
         _color = Colors.black;
-        priority = 'Your flight has already left';
+        priority = 'Your flight has already left.';
         difference = const Duration(hours: 0, minutes: 0, seconds: 0);
       }
       currentTime = DateFormat.jm().format(DateTime.now());
@@ -134,6 +137,8 @@ class _TimerPageState extends State<TimerPage> {
       departCode = getAbbreviation(departDate, widget.flight.departTimezone);
       arriveTime = DateFormat.jm().format(arriveDate);
       arriveCode = getAbbreviation(arriveDate, widget.flight.arriveTimezone);
+
+      _isReady = true;
     });
   }
 
@@ -150,6 +155,127 @@ class _TimerPageState extends State<TimerPage> {
     final tzTime = tz.TZDateTime.from(utcTime, location);
     return tzTime.timeZoneName;
   }
+
+  // _buildFlightContent() {
+  //   return Column(      
+  //     mainAxisAlignment: MainAxisAlignment.start,
+  //     verticalDirection: VerticalDirection.down,
+  //     children: <Widget>[
+  //       const SizedBox(height: 25),
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           IconButton(onPressed: _welcome, icon: const Icon(Icons.arrow_back), color: Colors.white, iconSize: 50),
+  //           IconButton(onPressed: _passport, icon: const Icon(Icons.badge), color: Colors.white, iconSize: 50),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 125),
+  //       Text(
+  //         departTimer,
+  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 60, fontWeight: FontWeight.bold),
+  //       ),
+  //       const SizedBox(height: 5),
+  //       Text(
+  //         'Currently, it is $currentTime.',
+  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+  //       ),
+  //       const SizedBox(height: 5),
+  //       Text(
+  //         priority,
+  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+  //       ),
+  //       const SizedBox(height: 25),
+  //       Text(
+  //         'Flight Details for ${widget.flight.flightIata}',
+  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+  //       ),
+  //       Text(
+  //         '($date)',
+  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+  //       ),
+  //       const SizedBox(height: 15),
+        
+  //       Flexible(
+  //         child: Row(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             // Departure Tracking Column.
+  //             Expanded(
+  //               child: Column(
+  //                 mainAxisAlignment: MainAxisAlignment.start,
+  //                 crossAxisAlignment: CrossAxisAlignment.center,
+  //                 children: [
+  //                   const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
+  //                   Text(
+  //                     '$departTime $departCode',
+  //                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+  //                     textAlign: TextAlign.center,
+  //                   ),
+  //                   Text(
+  //                     widget.flight.departNumber,
+  //                     style: GoogleFonts.openSans(
+  //                       color: Colors.white,
+  //                       fontSize: 25,
+  //                       fontWeight: FontWeight.bold,
+  //                     ),
+  //                     textAlign: TextAlign.center,
+  //                   ),
+  //                   Text(
+  //                     widget.flight.departName,
+  //                     maxLines: 2,
+  //                     overflow: TextOverflow.ellipsis,
+  //                     textAlign: TextAlign.center,
+  //                     style: GoogleFonts.openSans(
+  //                       color: Colors.white,
+  //                       fontSize: 15,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             const SizedBox(width: 25),
+  //             // Arrival Tracking Column.
+  //             Expanded(
+  //               child: Column(
+  //                 mainAxisAlignment: MainAxisAlignment.start,
+  //                 crossAxisAlignment: CrossAxisAlignment.center,
+  //                 children: [
+  //                   const Icon(Icons.flight_land, color: Colors.white, size: 50),
+  //                   Text(
+  //                     '$arriveTime $arriveCode',
+  //                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+  //                     textAlign: TextAlign.center,
+  //                   ),
+  //                   Text(
+  //                     widget.flight.arriveNumber,
+  //                     style: GoogleFonts.openSans(
+  //                       color: Colors.white,
+  //                       fontSize: 25,
+  //                       fontWeight: FontWeight.bold,
+  //                     ),
+  //                     textAlign: TextAlign.center,
+  //                   ),
+  //                   Text(
+  //                     widget.flight.arriveName,
+  //                     maxLines: 2,
+  //                     overflow: TextOverflow.ellipsis,
+  //                     textAlign: TextAlign.center,
+  //                     style: GoogleFonts.openSans(
+  //                       color: Colors.white,
+  //                       fontSize: 15,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //       const SizedBox(height: 75),  
+  //     ],
+  //   );
+  // }
 
   @override
   void dispose() {
@@ -174,206 +300,158 @@ class _TimerPageState extends State<TimerPage> {
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called.
     return Scaffold(
-      backgroundColor: _color,  
-      body: Center(
-        child: Column(      
-          mainAxisAlignment: MainAxisAlignment.start,
-          verticalDirection: VerticalDirection.down,
-          children: <Widget>[
-            const SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(onPressed: _welcome, icon: const Icon(Icons.arrow_back), color: Colors.white, iconSize: 50),
-                IconButton(onPressed: _passport, icon: const Icon(Icons.badge), color: Colors.white, iconSize: 50),
-              ],
-            ),
-            const SizedBox(height: 125),
-            Text(
-              departTimer,
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 60, fontWeight: FontWeight.bold)
-            ),
-            const SizedBox(height: 5),
-            Text(
-              'Currently, it is $currentTime.',
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-            ),
-            const SizedBox(height: 5),
-            Text(
-              '$priority.',
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-            ),
-            const SizedBox(height: 25),
-            Text(
-              'Flight Details for ${widget.flight.flightIata}',
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-            ),
-            Text(
-               '($date)',
-               style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-            ),
-            const SizedBox(height: 15),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center, // center items in column
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.flight_takeoff, color: Colors.white, size: 50,),
-                      Text(
-                        widget.flight.departNumber,
-                        style: GoogleFonts.openSans(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        widget.flight.departName,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.openSans(
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                      Text(
-                        '$departTime $departCode',
-                        style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+      backgroundColor: _color,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-                const SizedBox(width: 15),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center, // center items in column
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.flight_land, color: Colors.white, size: 50,),
-                      Text(
-                        widget.flight.arriveNumber,
-                        style: GoogleFonts.openSans(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 25),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              onPressed: _welcome,
+                              icon: const Icon(Icons.arrow_back),
+                              color: Colors.white,
+                              iconSize: 50,
+                            ),
+                            IconButton(
+                              onPressed: _passport,
+                              icon: const Icon(Icons.badge),
+                              color: Colors.white,
+                              iconSize: 50,
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        widget.flight.arriveName,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.openSans(
-                          color: Colors.white,
-                          fontSize: 15,
+                        const SizedBox(height: 50),
+                        Text(
+                          departTimer,
+                          style: GoogleFonts.openSans(
+                            color: Colors.white,
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                      Text(
-                        '$departTime $arriveCode',
-                        style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),            
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Column(
-            //       crossAxisAlignment: CrossAxisAlignment.center,
-            //       children: [
-            //         const Icon(Icons.flight_takeoff, color: Colors.white, size: 50,),
-            //         Text(
-            //           '$departTime $departCode',
-            //           style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-            //         ),
-            //         Text(
-            //           widget.flight.departNumber,
-            //           style: GoogleFonts.openSans(
-            //             color: Colors.white,
-            //             fontSize: 25,
-            //             fontWeight: FontWeight.bold,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //     const SizedBox(width: 25),
-            //     Column(
-            //       crossAxisAlignment: CrossAxisAlignment.center,
-            //       children: [
-            //         const Icon(Icons.flight_land, color: Colors.white, size: 50,),
-            //         Text(
-            //           '$arriveTime $arriveCode',
-            //           style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-            //         ),
-            //         Text(
-            //           widget.flight.arriveNumber,
-            //           style: GoogleFonts.openSans(
-            //             color: Colors.white,
-            //             fontSize: 25,
-            //             fontWeight: FontWeight.bold,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ],
-            // ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Flexible(
-            //       child: Column(
-            //         crossAxisAlignment: CrossAxisAlignment.center,
-            //         children: [
-            //           Text(
-            //             widget.flight.departName,
-            //             textAlign: TextAlign.center,
-            //             style: GoogleFonts.openSans(
-            //               color: Colors.white,
-            //               fontSize: 15,
-            //             ),
-            //             overflow: TextOverflow.ellipsis,
-            //             maxLines: 2,
-            //           ),                      
-            //         ],
-            //       ),
-            //     ),
-            //     const SizedBox(width: 20),
-            //     Flexible(
-            //       child: Column(
-            //         crossAxisAlignment: CrossAxisAlignment.center,
-            //         children: [
-            //           Text(
-            //             widget.flight.arriveName,
-            //             textAlign: TextAlign.center,
-            //             style: GoogleFonts.openSans(
-            //               color: Colors.white,
-            //               fontSize: 15,
-            //             ),
-            //             overflow: TextOverflow.ellipsis,
-            //             maxLines: 2,
-            //           ),                      
-            //         ],
-            //       ),
-            //     ),
-            //   ],
-            // ),
+                        const SizedBox(height: 5),
+                        Text(
+                          'Currently, it is $currentTime.',
+                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          priority,
+                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 25),
+                        Text(
+                          'Flight Details for ${widget.flight.flightIata}',
+                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '($date)',
+                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 15),
 
-            // if (_isAdLoaded) 
-            //   Container(
-            //     width: _bannerAd!.size.width.toDouble(),
-            //     height: _bannerAd!.size.height.toDouble(),
-            //     child: AdWidget(ad: _bannerAd!),
-            //   ),
-            const SizedBox(height: 75),  
-          ],
+                        // Row containing details about the flight.
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Column with rows of origin information.
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    '$departTime $departCode',
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.departNumber,
+                                    style: GoogleFonts.openSans(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.departName,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.openSans(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(width: 25),
+
+                            // Column with rows of destination information.
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.flight_land, color: Colors.white, size: 50),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    '$arriveTime $arriveCode',
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.arriveNumber,
+                                    style: GoogleFonts.openSans(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.arriveName,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.openSans(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
