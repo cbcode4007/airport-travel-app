@@ -40,7 +40,9 @@ class _PassportPageState extends State<PassportPage> {
   // Initially empty error message String for later assignment.
   String errorMessage = 'Loading...';
   // Initialize the message that indicates whether passport should be uploaded or if there is and it can be expanded.
-  String fileUploadStatus = 'Upload your passport to display here.';
+  String fileUploadStatus = '';
+  String noUpload = 'Upload your passport to display it in the box below.';
+  String yesUpload = 'Tap your password to replace it with another image.';
   // Initialize the background colour which changes at certain times.
   Color? _color = Colors.red[400];
   // Initialize the timer for constant updating of the program.
@@ -111,7 +113,12 @@ class _PassportPageState extends State<PassportPage> {
     if (path != null && await File(path).exists()) {
       setState(() {
         _passportImage = File(path);
-        fileUploadStatus = 'Tap on your password to replace it.';
+        fileUploadStatus = yesUpload;
+      });
+    }
+    else {
+      setState(() {
+        fileUploadStatus = noUpload;
       });
     }
   }
@@ -130,7 +137,7 @@ class _PassportPageState extends State<PassportPage> {
 
     setState(() {
       _passportImage = newImage;
-      fileUploadStatus = 'Tap on your password to replace it.';
+      fileUploadStatus = yesUpload;
     });
   }
 
@@ -148,7 +155,7 @@ class _PassportPageState extends State<PassportPage> {
 
     setState(() {
       _passportImage = null;
-      fileUploadStatus = 'Upload your passport to display here.';
+      fileUploadStatus = noUpload;
     });
   }
 
@@ -174,64 +181,81 @@ class _PassportPageState extends State<PassportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _color,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          verticalDirection: VerticalDirection.down,
-          children: <Widget>[
-            const SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: _timer,
-                  icon: const Icon(Icons.arrow_back),
-                  color: Colors.white,
-                  iconSize: 50,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-              ],
-            ),
-            const SizedBox(height: 25),
-            Text(
-              fileUploadStatus,
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-            ),
-            const SizedBox(height: 25),
-            GestureDetector(
-              onTap: _pickAndSaveImage,
-              child: _passportImage != null
-                  ? Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          _passportImage!,
-                          width: 275,
-                          height: 385,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      IconButton(
-                        onPressed: _confirmDelete,
-                        icon: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                    ],
-                  )
-                  : Column(
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        DottedBorder(
-                          color: Colors.white,
-                          child: const SizedBox(
-                            height: 385,
-                            width: 275,
-                            child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 75)
-                          ),
+                        const SizedBox(height: 25),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              onPressed: _timer,
+                              icon: const Icon(Icons.arrow_back),
+                              color: Colors.white,
+                              iconSize: 50,
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 25),
+                        Text(
+                          fileUploadStatus,
+                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 25),                        
+                        GestureDetector(
+                          onTap: _pickAndSaveImage,
+                          child: _passportImage != null
+                            ? Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    _passportImage!,
+                                    width: 275,
+                                    height: 385,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                const SizedBox(height: 25),
+                                IconButton(
+                                  onPressed: _confirmDelete,
+                                  icon: const Icon(Icons.delete, color: Colors.white),
+                                  iconSize: 50,
+                                ),
+                              ],
+                            )
+                            : Column(
+                                children: [
+                                  DottedBorder(
+                                    color: Colors.white,
+                                    child: const SizedBox(
+                                      height: 385,
+                                      width: 275,
+                                      child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 75)
+                                    ),
+                                  ),
+                                ],
+                            ),
+                        )
                       ],
                     ),
-            ),
-          ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
