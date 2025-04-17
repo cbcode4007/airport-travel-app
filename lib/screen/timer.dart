@@ -213,88 +213,159 @@ class _TimerPageState extends State<TimerPage> {
                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
             ),
             const SizedBox(height: 15),
-            Row (
-              mainAxisAlignment: MainAxisAlignment.center,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Column(
-                  children: [                                        
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.flight_takeoff,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center, // center items in column
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.flight_takeoff, color: Colors.white, size: 50,),
+                      Text(
+                        widget.flight.departNumber,
+                        style: GoogleFonts.openSans(
                           color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          widget.flight.departNumber,
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)
+                      ),
+                      Text(
+                        widget.flight.departName,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.openSans(
+                          color: Colors.white,
+                          fontSize: 15,
                         ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          widget.flight.departName,
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Text(
-                          '$departTime $departCode',
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      Text(
+                        '$departTime $departCode',
+                        style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(                  
-                  width: 25
-                ), 
-                Column(
-                  children: [                    
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.flight_land,
+                const SizedBox(width: 15),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center, // center items in column
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.flight_land, color: Colors.white, size: 50,),
+                      Text(
+                        widget.flight.arriveNumber,
+                        style: GoogleFonts.openSans(
                           color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          widget.flight.arriveNumber,
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)
+                      ),
+                      Text(
+                        widget.flight.arriveName,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.openSans(
+                          color: Colors.white,
+                          fontSize: 15,
                         ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          widget.flight.arriveName,
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Text(
-                          '$arriveTime $arriveCode',
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      Text(
+                        '$departTime $arriveCode',
+                        style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
+            ),            
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     Column(
+            //       crossAxisAlignment: CrossAxisAlignment.center,
+            //       children: [
+            //         const Icon(Icons.flight_takeoff, color: Colors.white, size: 50,),
+            //         Text(
+            //           '$departTime $departCode',
+            //           style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+            //         ),
+            //         Text(
+            //           widget.flight.departNumber,
+            //           style: GoogleFonts.openSans(
+            //             color: Colors.white,
+            //             fontSize: 25,
+            //             fontWeight: FontWeight.bold,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //     const SizedBox(width: 25),
+            //     Column(
+            //       crossAxisAlignment: CrossAxisAlignment.center,
+            //       children: [
+            //         const Icon(Icons.flight_land, color: Colors.white, size: 50,),
+            //         Text(
+            //           '$arriveTime $arriveCode',
+            //           style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+            //         ),
+            //         Text(
+            //           widget.flight.arriveNumber,
+            //           style: GoogleFonts.openSans(
+            //             color: Colors.white,
+            //             fontSize: 25,
+            //             fontWeight: FontWeight.bold,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ],
+            // ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     Flexible(
+            //       child: Column(
+            //         crossAxisAlignment: CrossAxisAlignment.center,
+            //         children: [
+            //           Text(
+            //             widget.flight.departName,
+            //             textAlign: TextAlign.center,
+            //             style: GoogleFonts.openSans(
+            //               color: Colors.white,
+            //               fontSize: 15,
+            //             ),
+            //             overflow: TextOverflow.ellipsis,
+            //             maxLines: 2,
+            //           ),                      
+            //         ],
+            //       ),
+            //     ),
+            //     const SizedBox(width: 20),
+            //     Flexible(
+            //       child: Column(
+            //         crossAxisAlignment: CrossAxisAlignment.center,
+            //         children: [
+            //           Text(
+            //             widget.flight.arriveName,
+            //             textAlign: TextAlign.center,
+            //             style: GoogleFonts.openSans(
+            //               color: Colors.white,
+            //               fontSize: 15,
+            //             ),
+            //             overflow: TextOverflow.ellipsis,
+            //             maxLines: 2,
+            //           ),                      
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // ),
+
             // if (_isAdLoaded) 
             //   Container(
             //     width: _bannerAd!.size.width.toDouble(),
