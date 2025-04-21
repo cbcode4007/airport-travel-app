@@ -16,7 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 // Advertisements.
-// import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -55,39 +55,17 @@ class _TimerPageState extends State<TimerPage> {
   late Timer _clockTimer;
 
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
-  // BannerAd? _bannerAd;
+  BannerAd? _bannerAd;
   bool _isAdLoaded = false;
-
-  bool _isReady = false;
 
   @override
   void initState() {
     super.initState();
     tz.initializeTimeZones();
-
-    // Try to initialize an ad unit to be displayed in ad widgets.
-    // Only initialize ads on supported platforms.
-    // if (Platform.isAndroid || Platform.isIOS) {
-    //   _bannerAd = BannerAd(
-    //     adUnitId: 'ca-app-pub-3940256099942544/6300978111',
-    //     size: AdSize.banner,
-    //     request: AdRequest(),
-    //     listener: BannerAdListener(
-    //       onAdLoaded: (Ad ad) {
-    //         setState(() {
-    //           _isAdLoaded = true;
-    //         });
-    //       },
-    //       onAdFailedToLoad: (Ad ad, LoadAdError error) {
-    //         ad.dispose();
-    //         print('BannerAd failed to load: $error');
-    //       },
-    //     ),
-    //   )..load();
-    // }
-
     _startClock();
     _updateTime();
+    MobileAds.instance.initialize();
+    loadAd();
   }
 
   void _startClock() {
@@ -137,8 +115,6 @@ class _TimerPageState extends State<TimerPage> {
       departCode = getAbbreviation(departDate, widget.flight.departTimezone);
       arriveTime = DateFormat.jm().format(arriveDate);
       arriveCode = getAbbreviation(arriveDate, widget.flight.arriveTimezone);
-
-      _isReady = true;
     });
   }
 
@@ -156,126 +132,32 @@ class _TimerPageState extends State<TimerPage> {
     return tzTime.timeZoneName;
   }
 
-  // _buildFlightContent() {
-  //   return Column(      
-  //     mainAxisAlignment: MainAxisAlignment.start,
-  //     verticalDirection: VerticalDirection.down,
-  //     children: <Widget>[
-  //       const SizedBox(height: 25),
-  //       Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           IconButton(onPressed: _welcome, icon: const Icon(Icons.arrow_back), color: Colors.white, iconSize: 50),
-  //           IconButton(onPressed: _passport, icon: const Icon(Icons.badge), color: Colors.white, iconSize: 50),
-  //         ],
-  //       ),
-  //       const SizedBox(height: 125),
-  //       Text(
-  //         departTimer,
-  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 60, fontWeight: FontWeight.bold),
-  //       ),
-  //       const SizedBox(height: 5),
-  //       Text(
-  //         'Currently, it is $currentTime.',
-  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-  //       ),
-  //       const SizedBox(height: 5),
-  //       Text(
-  //         priority,
-  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-  //       ),
-  //       const SizedBox(height: 25),
-  //       Text(
-  //         'Flight Details for ${widget.flight.flightIata}',
-  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-  //       ),
-  //       Text(
-  //         '($date)',
-  //         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-  //       ),
-  //       const SizedBox(height: 15),
-        
-  //       Flexible(
-  //         child: Row(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             // Departure Tracking Column.
-  //             Expanded(
-  //               child: Column(
-  //                 mainAxisAlignment: MainAxisAlignment.start,
-  //                 crossAxisAlignment: CrossAxisAlignment.center,
-  //                 children: [
-  //                   const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
-  //                   Text(
-  //                     '$departTime $departCode',
-  //                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-  //                     textAlign: TextAlign.center,
-  //                   ),
-  //                   Text(
-  //                     widget.flight.departNumber,
-  //                     style: GoogleFonts.openSans(
-  //                       color: Colors.white,
-  //                       fontSize: 25,
-  //                       fontWeight: FontWeight.bold,
-  //                     ),
-  //                     textAlign: TextAlign.center,
-  //                   ),
-  //                   Text(
-  //                     widget.flight.departName,
-  //                     maxLines: 2,
-  //                     overflow: TextOverflow.ellipsis,
-  //                     textAlign: TextAlign.center,
-  //                     style: GoogleFonts.openSans(
-  //                       color: Colors.white,
-  //                       fontSize: 15,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //             const SizedBox(width: 25),
-  //             // Arrival Tracking Column.
-  //             Expanded(
-  //               child: Column(
-  //                 mainAxisAlignment: MainAxisAlignment.start,
-  //                 crossAxisAlignment: CrossAxisAlignment.center,
-  //                 children: [
-  //                   const Icon(Icons.flight_land, color: Colors.white, size: 50),
-  //                   Text(
-  //                     '$arriveTime $arriveCode',
-  //                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-  //                     textAlign: TextAlign.center,
-  //                   ),
-  //                   Text(
-  //                     widget.flight.arriveNumber,
-  //                     style: GoogleFonts.openSans(
-  //                       color: Colors.white,
-  //                       fontSize: 25,
-  //                       fontWeight: FontWeight.bold,
-  //                     ),
-  //                     textAlign: TextAlign.center,
-  //                   ),
-  //                   Text(
-  //                     widget.flight.arriveName,
-  //                     maxLines: 2,
-  //                     overflow: TextOverflow.ellipsis,
-  //                     textAlign: TextAlign.center,
-  //                     style: GoogleFonts.openSans(
-  //                       color: Colors.white,
-  //                       fontSize: 15,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //       const SizedBox(height: 75),  
-  //     ],
-  //   );
-  // }
+  void loadAd() async {
+    // Try to initialize an ad unit to be displayed in ad widgets.
+    // Only initialize ads on supported platforms.
+    if (Platform.isAndroid || Platform.isIOS) {
+      // final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+      //   MediaQuery.sizeOf(context).width.truncate());
+      _bannerAd = BannerAd(
+        adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-3940256099942544/6300978111'
+          : 'ca-app-pub-3940256099942544/2435281174',
+        size: AdSize.banner,
+        request: const AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (Ad ad) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (Ad ad, LoadAdError error) {
+            ad.dispose();
+            print('BannerAd failed to load: $error');
+          },
+        ),
+      )..load();
+    }
+  }
 
   @override
   void dispose() {
@@ -368,7 +250,6 @@ class _TimerPageState extends State<TimerPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 15),
-
                         // Row containing details about the flight.
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,9 +288,7 @@ class _TimerPageState extends State<TimerPage> {
                                 ],
                               ),
                             ),
-
                             const SizedBox(width: 25),
-
                             // Column with rows of destination information.
                             Expanded(
                               child: Column(
@@ -443,6 +322,28 @@ class _TimerPageState extends State<TimerPage> {
                                 ],
                               ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 50),
+                        _bannerAd == null
+                        ? Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: _bannerAd!.size.width.toDouble(),
+                              height: _bannerAd!.size.height.toDouble(),
+                              child: const Text('Advertisement'),
+                            ),                          
+                          ],
+                        )
+                        : Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: _bannerAd!.size.width.toDouble(),
+                              height: _bannerAd!.size.height.toDouble(),
+                              child: AdWidget(ad: _bannerAd!),
+                            ),                          
                           ],
                         ),
                       ],
