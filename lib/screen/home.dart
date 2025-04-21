@@ -61,6 +61,7 @@ class _WelcomePageState extends State<WelcomePage> {
   //     throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
   //   }
   // }
+
   Future<Flight?> _callFlightAPI(String iata) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -73,13 +74,13 @@ class _WelcomePageState extends State<WelcomePage> {
       },
       "departure": {
         "iata": "YYZ",
-        "airport": "Toronto Pearson",
+        "airport": "Lester B. Pearson Airport",
         "estimated": "2025-04-21T17:00:00+00:00",
         "timezone": "America/Toronto",
       },
       "arrival": {
         "iata": "CDG",
-        "airport": "Charles de Gaulle",
+        "airport": "Charles de Gaulle Airport",
         "scheduled": "2025-04-17T05:00:00+00:00",
         "timezone": "Europe/Paris",
       }

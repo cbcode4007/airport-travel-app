@@ -180,24 +180,21 @@ class _TimerPageState extends State<TimerPage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called.
     return Scaffold(
       backgroundColor: _color,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Padding(
+            return Column(
+              children: [
+                // Top content (scrollable if needed)
+                Expanded(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 25),
+                        // Top icons
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -215,52 +212,61 @@ class _TimerPageState extends State<TimerPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 50),
-                        Text(
-                          departTimer,
-                          style: GoogleFonts.openSans(
-                            color: Colors.white,
-                            fontSize: 50,
-                            fontWeight: FontWeight.bold,
+
+                        const SizedBox(height: 93),
+
+                        // Timer & time info
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                departTimer,
+                                style: GoogleFonts.openSans(
+                                  color: Colors.white,
+                                  fontSize: 50,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 15),
+                              Text(
+                                'Currently, it is $currentTime.',
+                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                priority,
+                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 25),
+                              Text(
+                                'Flight Details for ${widget.flight.flightIata}',
+                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                '($date)',
+                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
                         ),
+
                         const SizedBox(height: 5),
-                        Text(
-                          'Currently, it is $currentTime.',
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          priority,
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 25),
-                        Text(
-                          'Flight Details for ${widget.flight.flightIata}',
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          '($date)',
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 15),
-                        // Row containing details about the flight.
+
+                        // Flight details row
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Column with rows of origin information.
                             Expanded(
                               child: Column(
                                 children: [
                                   const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
-                                  const SizedBox(height: 5),
+                                  const SizedBox(height: 8),
                                   Text(
                                     '$departTime $departCode',
                                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
@@ -277,24 +283,20 @@ class _TimerPageState extends State<TimerPage> {
                                   ),
                                   Text(
                                     widget.flight.departName,
-                                    maxLines: 2,
+                                    maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.openSans(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                    ),
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                   ),
                                 ],
                               ),
                             ),
                             const SizedBox(width: 25),
-                            // Column with rows of destination information.
                             Expanded(
                               child: Column(
                                 children: [
                                   const Icon(Icons.flight_land, color: Colors.white, size: 50),
-                                  const SizedBox(height: 5),
+                                  const SizedBox(height: 8),
                                   Text(
                                     '$arriveTime $arriveCode',
                                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
@@ -311,49 +313,41 @@ class _TimerPageState extends State<TimerPage> {
                                   ),
                                   Text(
                                     widget.flight.arriveName,
-                                    maxLines: 2,
+                                    maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.openSans(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                    ),
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 50),
-                        _bannerAd == null
-                        ? const Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              width: 320,
-                              height: 50,
-                            ),                          
-                          ],
-                        )
-                        : Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              width: _bannerAd!.size.width.toDouble(),
-                              height: _bannerAd!.size.height.toDouble(),
-                              child: AdWidget(ad: _bannerAd!),
-                            ),                          
-                          ],
-                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
+
+                // Ad pinned to bottom.
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _bannerAd == null
+                  ? const SizedBox(
+                      width: 320,
+                      height: 50,
+                    )
+                  : SizedBox(
+                      width: _bannerAd!.size.width.toDouble(),
+                      height: _bannerAd!.size.height.toDouble(),
+                      child: AdWidget(ad: _bannerAd!),
+                    ),
+                ),
+              ],
             );
           },
         ),
       ),
     );
   }
+
 }

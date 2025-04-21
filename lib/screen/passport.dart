@@ -211,6 +211,112 @@ class _PassportPageState extends State<PassportPage> {
     }
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     backgroundColor: _color,
+  //     body: SafeArea(
+  //       child: LayoutBuilder(
+  //         builder: (context, constraints) {
+  //           return SingleChildScrollView(
+  //             child: ConstrainedBox(
+  //               constraints: BoxConstraints(
+  //                 minHeight: constraints.maxHeight,
+  //               ),
+  //               child: IntrinsicHeight(
+  //                 child: Padding(
+  //                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.stretch,
+  //                     children: [
+  //                       const SizedBox(height: 25),
+  //                       Row(
+  //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                         children: [
+  //                           IconButton(
+  //                             onPressed: _timer,
+  //                             icon: const Icon(Icons.arrow_back),
+  //                             color: Colors.white,
+  //                             iconSize: 50,
+  //                           ),
+  //                         ],
+  //                       ),
+  //                       const SizedBox(height: 25),
+  //                       Text(
+  //                         fileUploadStatus,
+  //                         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+  //                         textAlign: TextAlign.center,
+  //                       ),
+  //                       const SizedBox(height: 25),                        
+  //                       GestureDetector(
+  //                         onTap: _pickAndSaveImage,
+  //                         child: _passportImage != null
+  //                           ? Column(
+  //                             children: [
+  //                               ClipRRect(
+  //                                 borderRadius: BorderRadius.circular(12),
+  //                                 child: Image.file(
+  //                                   _passportImage!,
+  //                                   width: 275,
+  //                                   height: 385,
+  //                                   fit: BoxFit.cover,
+  //                                 ),
+  //                               ),
+  //                               //const SizedBox(height: 25),
+  //                               IconButton(
+  //                                 onPressed: _confirmDelete,
+  //                                 icon: const Icon(Icons.delete, color: Colors.white),
+  //                                 iconSize: 50,
+  //                               ),
+  //                             ],
+  //                           )
+  //                           : Column(
+  //                               children: [
+  //                                 DottedBorder(
+  //                                   color: Colors.white,
+  //                                   child: const SizedBox(
+  //                                     height: 385,
+  //                                     width: 275,
+  //                                     child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 75)
+  //                                   ),
+  //                                 ),
+  //                                 const SizedBox(height: 63),
+  //                               ],
+  //                           ),
+  //                       ),
+  //                       const SizedBox(height: 25),
+  //                       _bannerAd == null
+  //                       ? const Column(
+  //                         mainAxisAlignment: MainAxisAlignment.end,
+  //                         children: [
+  //                           SizedBox(
+  //                             width: 320,
+  //                             height: 50,
+  //                           ),                          
+  //                         ],
+  //                       )
+  //                       : Column(
+  //                         mainAxisAlignment: MainAxisAlignment.end,
+  //                         children: [
+  //                           SizedBox(
+  //                             width: _bannerAd!.size.width.toDouble(),
+  //                             height: _bannerAd!.size.height.toDouble(),
+  //                             child: AdWidget(ad: _bannerAd!),
+  //                           ),                          
+  //                         ],
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -218,18 +324,16 @@ class _PassportPageState extends State<PassportPage> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Padding(
+            return Column(
+              children: [
+                // Main scrollable content
+                Expanded(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 25),
+                        // Top icon
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -241,79 +345,81 @@ class _PassportPageState extends State<PassportPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 25),
+                        const SizedBox(height: 50),                        
                         Text(
                           fileUploadStatus,
-                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
+                          style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                         ),
-                        const SizedBox(height: 25),                        
+                        const SizedBox(height: 25),
+
+                        // Upload zone or preview
                         GestureDetector(
                           onTap: _pickAndSaveImage,
                           child: _passportImage != null
-                            ? Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    _passportImage!,
-                                    width: 275,
-                                    height: 385,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                //const SizedBox(height: 25),
-                                IconButton(
-                                  onPressed: _confirmDelete,
-                                  icon: const Icon(Icons.delete, color: Colors.white),
-                                  iconSize: 50,
-                                ),
-                              ],
-                            )
-                            : Column(
-                                children: [
-                                  DottedBorder(
-                                    color: Colors.white,
-                                    child: const SizedBox(
-                                      height: 385,
-                                      width: 275,
-                                      child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 75)
+                              ? Column(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(
+                                        _passportImage!,
+                                        width: 275,
+                                        height: 385,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 63),
-                                ],
-                            ),
-                        ),
-                        const SizedBox(height: 25),
-                        _bannerAd == null
-                        ? const Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              width: 320,
-                              height: 50,
-                            ),                          
-                          ],
-                        )
-                        : Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              width: _bannerAd!.size.width.toDouble(),
-                              height: _bannerAd!.size.height.toDouble(),
-                              child: AdWidget(ad: _bannerAd!),
-                            ),                          
-                          ],
+                                    const SizedBox(height: 15),
+                                    IconButton(
+                                      onPressed: _confirmDelete,
+                                      icon: const Icon(Icons.delete, color: Colors.white),
+                                      iconSize: 50,
+                                    ),
+                                  ],
+                                )
+                              : Column(
+                                  children: [
+                                    DottedBorder(
+                                      color: Colors.white,
+                                      child: const SizedBox(
+                                        height: 385,
+                                        width: 275,
+                                        child: Icon(
+                                          Icons.file_upload_outlined,
+                                          color: Colors.white,
+                                          size: 75,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
+
+                // Ad pinned to bottom
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _bannerAd == null
+                      ? const SizedBox(
+                          width: 320,
+                          height: 50,
+                        )
+                      : SizedBox(
+                          width: _bannerAd!.size.width.toDouble(),
+                          height: _bannerAd!.size.height.toDouble(),
+                          child: AdWidget(ad: _bannerAd!),
+                        ),
+                ),
+              ],
             );
           },
         ),
       ),
     );
   }
+
 }
