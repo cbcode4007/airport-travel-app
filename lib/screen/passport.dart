@@ -15,6 +15,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
+// Dynamic advertisement banners.
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -42,13 +44,16 @@ class _PassportPageState extends State<PassportPage> {
   // Initialize the message that indicates whether passport should be uploaded or if there is and it can be expanded.
   String fileUploadStatus = '';
   String noUpload = 'Upload your passport to display it in the box below.';
-  String yesUpload = 'Tap your password to replace it with another image.';
+  String yesUpload = 'Tap your passport to replace it with another image.';
   // Initialize the background colour which changes at certain times.
   Color? _color = Colors.red[400];
   // Initialize the timer for constant updating of the program.
   late Timer _clockTimer;
   // Declare to-be image file for the user passport.
   File? _passportImage;
+  // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
 
   @override
   void initState() {
@@ -56,6 +61,8 @@ class _PassportPageState extends State<PassportPage> {
     _startClock();
     _updateTime();
     _loadPassportImage();
+    MobileAds.instance.initialize();
+    loadAd();
   }
 
   void _startClock() {
@@ -89,6 +96,33 @@ class _PassportPageState extends State<PassportPage> {
         difference = const Duration(hours: 0, minutes: 0, seconds: 0);
       }
     });
+  }
+
+  void loadAd() async {
+    // Try to initialize an ad unit to be displayed in ad widgets.
+    // Only initialize ads on supported platforms.
+    if (Platform.isAndroid || Platform.isIOS) {
+      // final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+      //   MediaQuery.sizeOf(context).width.truncate());
+      _bannerAd = BannerAd(
+        adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-3940256099942544/6300978111'
+          : 'ca-app-pub-3940256099942544/2435281174',
+        size: AdSize.banner,
+        request: const AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (Ad ad) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (Ad ad, LoadAdError error) {
+            ad.dispose();
+            print('BannerAd failed to load: $error');
+          },
+        ),
+      )..load();
+    }
   }
 
   @override
@@ -228,7 +262,7 @@ class _PassportPageState extends State<PassportPage> {
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                                const SizedBox(height: 25),
+                                //const SizedBox(height: 25),
                                 IconButton(
                                   onPressed: _confirmDelete,
                                   icon: const Icon(Icons.delete, color: Colors.white),
@@ -246,9 +280,31 @@ class _PassportPageState extends State<PassportPage> {
                                       child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 75)
                                     ),
                                   ),
+                                  const SizedBox(height: 63),
                                 ],
                             ),
+                        ),
+                        const SizedBox(height: 25),
+                        _bannerAd == null
+                        ? const Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: 320,
+                              height: 50,
+                            ),                          
+                          ],
                         )
+                        : Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: _bannerAd!.size.width.toDouble(),
+                              height: _bannerAd!.size.height.toDouble(),
+                              child: AdWidget(ad: _bannerAd!),
+                            ),                          
+                          ],
+                        ),
                       ],
                     ),
                   ),

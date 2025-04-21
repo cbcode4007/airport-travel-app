@@ -15,7 +15,7 @@ import 'package:intl/intl.dart';
 // Timezone abbreviation display.
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-// Advertisements.
+// Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // This class is the configuration for the state. It holds the values (in this
@@ -326,13 +326,12 @@ class _TimerPageState extends State<TimerPage> {
                         ),
                         const SizedBox(height: 50),
                         _bannerAd == null
-                        ? Column(
+                        ? const Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             SizedBox(
-                              width: _bannerAd!.size.width.toDouble(),
-                              height: _bannerAd!.size.height.toDouble(),
-                              child: const Text('Advertisement'),
+                              width: 320,
+                              height: 50,
                             ),                          
                           ],
                         )
