@@ -75,7 +75,7 @@ class _WelcomePageState extends State<WelcomePage> {
       "departure": {
         "iata": "CDG",
         "airport": "Charles de Gaulle Airport",
-        "estimated": "2025-04-22T23:00:00+00:00",
+        "estimated": "2025-04-22T17:00:00+00:00",
         "timezone": "Europe/Paris",
       },
       "arrival": {

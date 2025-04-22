@@ -81,35 +81,32 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   void _updateTime() {
-
-    // Initialize values to calculate departure timezone for accurate counting.
+    // Initialize values to calculate departure timezone for accurate counting and display.
     rawTime = widget.flight.departDate.toString();
     tzName = widget.flight.departTimezone;
     // Parse the raw time without a timezone attached.
     DateTime naiveLocalTime = DateTime.parse(rawTime);
     // Look up the timezone location.
-    final location = tz.getLocation(tzName);
-    // Apply timezone to the naive time.
+    var location = tz.getLocation(tzName);
+    // Apply timezone to the naive time and DateTime.now() for counter calculation.
     final tz.TZDateTime tzDepartDate = tz.TZDateTime.from(naiveLocalTime, location);
-
-    // Format raw json departure date and time for timer (workaround using a standard universal date format for API).
-    // Remove UTC offset from string data (+00:00 is chopped off of the end).
-    // String departDateString = widget.flight.departDate.toString().substring(0,19);
-    // Send back to date for operations with current time and formatting.
-    // DateTime departDate = DateTime.parse(departDateString);
-    // date = DateFormat.yMMMMd().format(departDate);
+    final tz.TZDateTime tzCurrentDate = tz.TZDateTime.from(DateTime.now(), location);
 
     // Set day, month and year to how they are in the departure timezone.
     date = DateFormat.yMMMMd().format(tzDepartDate);
-    // Calculate time until flight, every second to keep the clock updated.
-    Duration difference = tzDepartDate.difference(DateTime.now());
+    // Calculate time until flight, using both times from the depart timezone, each second to keep the clock updated.
+    Duration difference = tzDepartDate.difference(tzCurrentDate);
 
-    // Format raw json arrival date and time for display (workaround using a standard universal date format for API).
-    // This can remain a naive date since it is not used in calculation.
-    // Remove UTC offset from string data.
-    String arriveDateString = widget.flight.arriveDate.toString().substring(0,19);
-    // Send back to date for formatting.
-    DateTime arriveDate = DateTime.parse(arriveDateString);
+    // Initialize values to calculate arrival timezone for accurate display.
+    rawTime = widget.flight.arriveDate.toString();
+    tzName = widget.flight.arriveTimezone;
+    // Parse the raw time without a timezone attached.
+    naiveLocalTime = DateTime.parse(rawTime);
+    // Look up the timezone location.
+    location = tz.getLocation(tzName);
+    // Apply timezone to the naive time and DateTime.now() for calculation.
+    final tz.TZDateTime tzArriveDate = tz.TZDateTime.from(naiveLocalTime, location);
+    print(tzArriveDate);
 
     setState(() {
       priority = 'Your priority status is Priority 3.';
@@ -130,8 +127,8 @@ class _TimerPageState extends State<TimerPage> {
       departTimer = _printDuration(difference);
       departTime = DateFormat.jm().format(tzDepartDate);
       departCode = getAbbreviation(tzDepartDate, widget.flight.departTimezone);
-      arriveTime = DateFormat.jm().format(arriveDate);
-      arriveCode = getAbbreviation(arriveDate, widget.flight.arriveTimezone);
+      arriveTime = DateFormat.jm().format(tzArriveDate);
+      arriveCode = getAbbreviation(tzArriveDate, widget.flight.arriveTimezone);
     });
   }
 
@@ -246,7 +243,7 @@ class _TimerPageState extends State<TimerPage> {
                               ),
                               const SizedBox(height: 15),
                               Text(
-                                'Currently, it is $currentTime.',
+                                'It is $currentTime here.',
                                 style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
