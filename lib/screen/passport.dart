@@ -15,6 +15,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
+// Timezone logic for correct displays.
+import 'package:timezone/timezone.dart' as tz;
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -76,13 +78,18 @@ class _PassportPageState extends State<PassportPage> {
   }
 
   void _updateTime() {
-    // Format raw json departure date and time for timer (workaround using a standard universal date format for API).
-    // Remove UTC offset from string data (+00:00 is chopped off of the end).
-    String departDateString = widget.flight.departDate.toString().substring(0,19);
-    // Send back to date for operations with current time and formatting.
-    DateTime departDate = DateTime.parse(departDateString);
-    // Calculate time until flight.
-    Duration difference = departDate.difference(DateTime.now());
+     // Initialize values to calculate departure timezone for accurate counting and display.
+    String rawTime = widget.flight.departDate.toString();
+    String tzName = widget.flight.departTimezone;
+    // Parse the raw time without a timezone attached.
+    DateTime naiveLocalTime = DateTime.parse(rawTime);
+    // Look up the timezone location.
+    var location = tz.getLocation(tzName);
+    // Apply timezone to the naive time and DateTime.now() for counter calculation.
+    final tz.TZDateTime tzDepartDate = tz.TZDateTime.from(naiveLocalTime, location);
+    final tz.TZDateTime tzCurrentDate = tz.TZDateTime.from(DateTime.now(), location);
+    // Calculate time until flight, using both times from the depart timezone, each second to keep the clock updated.
+    Duration difference = tzDepartDate.difference(tzCurrentDate);
 
     setState(() {
       if (difference.inMinutes < 90)  {
@@ -211,112 +218,6 @@ class _PassportPageState extends State<PassportPage> {
     }
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     backgroundColor: _color,
-  //     body: SafeArea(
-  //       child: LayoutBuilder(
-  //         builder: (context, constraints) {
-  //           return SingleChildScrollView(
-  //             child: ConstrainedBox(
-  //               constraints: BoxConstraints(
-  //                 minHeight: constraints.maxHeight,
-  //               ),
-  //               child: IntrinsicHeight(
-  //                 child: Padding(
-  //                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-  //                   child: Column(
-  //                     crossAxisAlignment: CrossAxisAlignment.stretch,
-  //                     children: [
-  //                       const SizedBox(height: 25),
-  //                       Row(
-  //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                         children: [
-  //                           IconButton(
-  //                             onPressed: _timer,
-  //                             icon: const Icon(Icons.arrow_back),
-  //                             color: Colors.white,
-  //                             iconSize: 50,
-  //                           ),
-  //                         ],
-  //                       ),
-  //                       const SizedBox(height: 25),
-  //                       Text(
-  //                         fileUploadStatus,
-  //                         style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-  //                         textAlign: TextAlign.center,
-  //                       ),
-  //                       const SizedBox(height: 25),                        
-  //                       GestureDetector(
-  //                         onTap: _pickAndSaveImage,
-  //                         child: _passportImage != null
-  //                           ? Column(
-  //                             children: [
-  //                               ClipRRect(
-  //                                 borderRadius: BorderRadius.circular(12),
-  //                                 child: Image.file(
-  //                                   _passportImage!,
-  //                                   width: 275,
-  //                                   height: 385,
-  //                                   fit: BoxFit.cover,
-  //                                 ),
-  //                               ),
-  //                               //const SizedBox(height: 25),
-  //                               IconButton(
-  //                                 onPressed: _confirmDelete,
-  //                                 icon: const Icon(Icons.delete, color: Colors.white),
-  //                                 iconSize: 50,
-  //                               ),
-  //                             ],
-  //                           )
-  //                           : Column(
-  //                               children: [
-  //                                 DottedBorder(
-  //                                   color: Colors.white,
-  //                                   child: const SizedBox(
-  //                                     height: 385,
-  //                                     width: 275,
-  //                                     child: Icon(Icons.file_upload_outlined, color: Colors.white, size: 75)
-  //                                   ),
-  //                                 ),
-  //                                 const SizedBox(height: 63),
-  //                               ],
-  //                           ),
-  //                       ),
-  //                       const SizedBox(height: 25),
-  //                       _bannerAd == null
-  //                       ? const Column(
-  //                         mainAxisAlignment: MainAxisAlignment.end,
-  //                         children: [
-  //                           SizedBox(
-  //                             width: 320,
-  //                             height: 50,
-  //                           ),                          
-  //                         ],
-  //                       )
-  //                       : Column(
-  //                         mainAxisAlignment: MainAxisAlignment.end,
-  //                         children: [
-  //                           SizedBox(
-  //                             width: _bannerAd!.size.width.toDouble(),
-  //                             height: _bannerAd!.size.height.toDouble(),
-  //                             child: AdWidget(ad: _bannerAd!),
-  //                           ),                          
-  //                         ],
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       ),
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -361,14 +262,11 @@ class _PassportPageState extends State<PassportPage> {
                           child: _passportImage != null
                               ? Column(
                                   children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.file(
-                                        _passportImage!,
-                                        width: 275,
-                                        height: 385,
-                                        fit: BoxFit.cover,
-                                      ),
+                                    Image.file(
+                                      _passportImage!,
+                                      width: 275,
+                                      height: 385,
+                                      fit: BoxFit.cover,
                                     ),
                                     const SizedBox(height: 15),
                                     IconButton(
@@ -380,6 +278,7 @@ class _PassportPageState extends State<PassportPage> {
                                 )
                               : Column(
                                   children: [
+                                    const SizedBox(height: 50),
                                     DottedBorder(
                                       color: Colors.white,
                                       child: const SizedBox(

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // Date manipulation.
 import 'package:intl/intl.dart';
-// Timezone abbreviation display.
+// Timezone logic for correct displays.
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 // Dynamic advertisement banners.
@@ -64,13 +64,13 @@ class _TimerPageState extends State<TimerPage> {
   void initState() {
     super.initState();
     tz.initializeTimeZones();
-    _startClock();
+    startClock();
     _updateTime();
     MobileAds.instance.initialize();
     loadAd();
   }
 
-  void _startClock() {
+  void startClock() {
     Future.delayed(const Duration(seconds: 0), () {
       if (!mounted) return;
 
@@ -106,7 +106,6 @@ class _TimerPageState extends State<TimerPage> {
     location = tz.getLocation(tzName);
     // Apply timezone to the naive time and DateTime.now() for calculation.
     final tz.TZDateTime tzArriveDate = tz.TZDateTime.from(naiveLocalTime, location);
-    print(tzArriveDate);
 
     setState(() {
       priority = 'Your priority status is Priority 3.';
