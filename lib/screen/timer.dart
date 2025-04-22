@@ -39,7 +39,7 @@ class TimerPage extends StatefulWidget {
 // This class controls all of the logic for the state of this widget.
 class _TimerPageState extends State<TimerPage> {
   // Variables to be updated in code later.
-  // Initialize information displays.
+  // Declare and initialize information displays.
   String priority = '';
   String departTime = '';
   String arriveTime = '';
@@ -48,11 +48,13 @@ class _TimerPageState extends State<TimerPage> {
   String departTimer = '';
   String departCode = '';
   String arriveCode = '';
-  
+  // Declare timezone calculation values.
+  String rawTime = '';
+  String tzName = '';
+  // Declare the timer for constant updating of the program.
+  late Timer _clockTimer;
   // Initialize the background colour which changes at certain times.
   Color? _color = Colors.red[400];
-  // Initialize the timer for constant updating of the program.
-  late Timer _clockTimer;
 
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
   BannerAd? _bannerAd;
@@ -79,16 +81,31 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   void _updateTime() {
+
+    // Initialize values to calculate departure timezone for accurate counting.
+    rawTime = widget.flight.departDate.toString();
+    tzName = widget.flight.departTimezone;
+    // Parse the raw time without a timezone attached.
+    DateTime naiveLocalTime = DateTime.parse(rawTime);
+    // Look up the timezone location.
+    final location = tz.getLocation(tzName);
+    // Apply timezone to the naive time.
+    final tz.TZDateTime tzDepartDate = tz.TZDateTime.from(naiveLocalTime, location);
+
     // Format raw json departure date and time for timer (workaround using a standard universal date format for API).
     // Remove UTC offset from string data (+00:00 is chopped off of the end).
-    String departDateString = widget.flight.departDate.toString().substring(0,19);
+    // String departDateString = widget.flight.departDate.toString().substring(0,19);
     // Send back to date for operations with current time and formatting.
-    DateTime departDate = DateTime.parse(departDateString);
-    date = DateFormat.yMMMMd().format(departDate);
-    // Calculate time until flight.
-    Duration difference = departDate.difference(DateTime.now());
+    // DateTime departDate = DateTime.parse(departDateString);
+    // date = DateFormat.yMMMMd().format(departDate);
 
-    // Format raw json arrival date and time for display (workaround using a standard universal date format for API)
+    // Set day, month and year to how they are in the departure timezone.
+    date = DateFormat.yMMMMd().format(tzDepartDate);
+    // Calculate time until flight, every second to keep the clock updated.
+    Duration difference = tzDepartDate.difference(DateTime.now());
+
+    // Format raw json arrival date and time for display (workaround using a standard universal date format for API).
+    // This can remain a naive date since it is not used in calculation.
     // Remove UTC offset from string data.
     String arriveDateString = widget.flight.arriveDate.toString().substring(0,19);
     // Send back to date for formatting.
@@ -111,8 +128,8 @@ class _TimerPageState extends State<TimerPage> {
       }
       currentTime = DateFormat.jm().format(DateTime.now());
       departTimer = _printDuration(difference);
-      departTime = DateFormat.jm().format(departDate);
-      departCode = getAbbreviation(departDate, widget.flight.departTimezone);
+      departTime = DateFormat.jm().format(tzDepartDate);
+      departCode = getAbbreviation(tzDepartDate, widget.flight.departTimezone);
       arriveTime = DateFormat.jm().format(arriveDate);
       arriveCode = getAbbreviation(arriveDate, widget.flight.arriveTimezone);
     });
@@ -136,8 +153,6 @@ class _TimerPageState extends State<TimerPage> {
     // Try to initialize an ad unit to be displayed in ad widgets.
     // Only initialize ads on supported platforms.
     if (Platform.isAndroid || Platform.isIOS) {
-      // final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-      //   MediaQuery.sizeOf(context).width.truncate());
       _bannerAd = BannerAd(
         adUnitId: Platform.isAndroid
           ? 'ca-app-pub-3940256099942544/6300978111'

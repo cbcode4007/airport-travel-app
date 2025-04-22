@@ -40,7 +40,7 @@ class _WelcomePageState extends State<WelcomePage> {
     super.initState();
   }
 
-  // Calls the AviationStack API and returns a flight that matches the key given.
+  // Calls the AviationStack API and returns a Flight object from JSON that matches the key value (IATA) given.
   // Future<Flight?> _callFlightAPI(String iata) async {
   //   const key = 'c1a9697f9b6263fffcb12a94543e68fa';
   //   String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
@@ -73,19 +73,18 @@ class _WelcomePageState extends State<WelcomePage> {
         "icao": "WZZ7905",
       },
       "departure": {
-        "iata": "YYZ",
-        "airport": "Lester B. Pearson Airport",
-        "estimated": "2025-04-21T17:00:00+00:00",
-        "timezone": "America/Toronto",
-      },
-      "arrival": {
         "iata": "CDG",
         "airport": "Charles de Gaulle Airport",
-        "scheduled": "2025-04-17T05:00:00+00:00",
+        "estimated": "2025-04-22T23:00:00+00:00",
         "timezone": "Europe/Paris",
+      },
+      "arrival": {
+        "iata": "YYZ",
+        "airport": "Lester B. Pearson Airport",
+        "scheduled": "2025-04-23T00:00:00+00:00",
+        "timezone": "America/Toronto",
       }
     };
-
     return Flight.fromJson(mockJson);
   }
 
@@ -98,10 +97,6 @@ class _WelcomePageState extends State<WelcomePage> {
     const String errorMessageEmpty = 'You must enter a flight number to continue!';
     const String errorMessageFormat = 'The flight number you entered is invalid! Please use two or three letters at the front and one to four numbers behind them.';
     const String errorMessageCall = 'The flight number you entered could not be found! Please check and try again.';
-
-    setState(() {
-      errorMessage = '';
-    });
 
     if (flightNumber != '') {
       if ((flightNumber.length >= 3 && flightNumber.length <= 7) && (flightNumberRegExp.hasMatch(flightNumber))) {
@@ -170,105 +165,120 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called.
     return Scaffold(
-      backgroundColor: Colors.lightBlue,  
+      backgroundColor: Colors.lightBlue,
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: AspectRatio(
           aspectRatio: 9 / 16,
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).         
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Presents a given logo image at a specific size and uniform aspect ratio in a formatted circle.
-              ClipRRect(
-                borderRadius: BorderRadius.circular(100.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/logo.png')
-                    )
-                  )                  
-                )
-              ),
-              // Welcome heading.
-              Text(
-                'Welcome!',
-                style: GoogleFonts.openSans(color:Colors.white, fontWeight: FontWeight.bold, fontSize: 27)
-              ),
-              const SizedBox(height: 25),  
-              Column(
-                children: [
-                  // Flight number prompt.
-                  Text(
-                    'Please enter your',
-                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-                  ),
-                  Text(
-                    'IATA flight number below.',
-                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15)
-                  ),
-                  // Flight number entry area.
-                  Container(
-                    margin: const EdgeInsets.all(20.0),
-                    child: SizedBox(
-                      width: 280,
-                      child: TextField(
-                        controller: _controller,
-                        style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                        cursorColor: Colors.white,
-                        decoration: InputDecoration(
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white70)
-                          ),
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white)
-                          ),
-                          hintText: 'AAA####',
-                          hintStyle: GoogleFonts.openSans(color: Colors.white70, fontSize: 15)
-                        ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              children: [
+                const Spacer(flex: 2),
+
+                // Logo
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(100.0),
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                      color: Colors.transparent,
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/logo.png'),
                       ),
                     ),
                   ),
-                ],
-              ),
-              // Flight number submission button which will call for validation and clear what was typed.
-              TextButton(
-                onPressed: () {                
-                  _validateFlightInput(_controller.text);
-                  _controller.clear();
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  fixedSize: const Size(150, 40)
                 ),
-                child: Text(
-                  'SUBMIT',
+
+                const SizedBox(height: 16),
+
+                // Welcome Text
+                Text(
+                  'Welcome!',
                   style: GoogleFonts.openSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.lightBlue,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 27,
                   ),
                 ),
-              ),
-              const SizedBox(height: 75)
-            ],
+
+                const SizedBox(height: 24),
+
+                // Instruction Text
+                Column(
+                  children: [
+                    Text(
+                      'Please enter your',
+                      style: GoogleFonts.openSans(
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Text(
+                      'IATA flight number below.',
+                      style: GoogleFonts.openSans(
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Input Field
+                SizedBox(
+                  width: 280,
+                  child: TextField(
+                    controller: _controller,
+                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                    cursorColor: Colors.white,
+                    decoration: InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white70),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      hintText: 'AAA####',
+                      hintStyle: GoogleFonts.openSans(
+                        color: Colors.white70,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Submit Button
+                TextButton(
+                  onPressed: () {
+                    _validateFlightInput(_controller.text);
+                    _controller.clear();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    fixedSize: const Size(150, 40),
+                  ),
+                  child: Text(
+                    'SUBMIT',
+                    style: GoogleFonts.openSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.lightBlue,
+                    ),
+                  ),
+                ),
+
+                const Spacer(flex: 3),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
 }
