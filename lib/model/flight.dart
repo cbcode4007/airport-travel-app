@@ -1,3 +1,12 @@
+/*
+  Author:      Colin Bond
+  File:        flight.dart
+  Description: This file provides the model for a Flight class, that
+               takes all of the necessary values in the case of Airport Travel Application from API JSON responses.
+               It is used as a way to calculate the departure timer and therefore priority for a flight number,
+               and supply other often useful details about the flight.
+*/
+
 class Flight {
   final String flightIata;
   final String flightIcao;

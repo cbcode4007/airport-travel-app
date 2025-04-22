@@ -1,24 +1,29 @@
+/*
+  Author:      Colin Bond
+  File:        main.dart
+  Description: This file is at the center of the Airport Travel Application, being responsible for
+               running it and navigating to its home page.
+*/
+
+// Imported dependency packages.
+// Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
+// Route to the next screen.
 import 'package:airport_travel_app/screen/home.dart';
-// import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // MobileAds.instance.initialize();
   runApp(const AirportTravelApp());
 }
 
 class AirportTravelApp extends StatelessWidget {
   const AirportTravelApp({super.key});
 
-  // This widget is the root of your application.
+  // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        // This is the theme of the homepage.
-      ),
-      home: const WelcomePage(title: 'home'),
+    return const MaterialApp(
+      // Navigate to the first or Welcome page.
+      home: WelcomePage(title: 'home'),
     );
   }
 }

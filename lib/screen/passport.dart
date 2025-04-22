@@ -1,10 +1,20 @@
+/*
+  Author:      Colin Bond
+  File:        passport.dart
+  Description: This file provides an area to upload and display a passport with the background color from
+               last page visible. Users can tap on their uploaded passport to replace it, or
+               tap on a garbage icon that appears when there is a passport to delete it.
+               It is a simpler way to show priority as well as credentials.
+*/
+
+// Imported dependency packages.
 // Future class for asynchronous updating.
 import 'dart:async';
 // Route to the previous screen.
 import 'package:airport_travel_app/screen/timer.dart';
 // Flight data to determine background colour.
 import 'package:airport_travel_app/model/flight.dart';
-// Material app design, or in other words Google recommendations for UI.
+// Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
 // Open Sans Font.
 import 'package:google_fonts/google_fonts.dart';
@@ -15,13 +25,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
-// Timezone logic for correct displays.
+// Timezone logic for correct background display.
 import 'package:timezone/timezone.dart' as tz;
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // This class is the configuration for the state. It holds the values (in this
-// case the title) provided by the parent (in this case the App widget) and
+// case the title and flight) provided by the parent (in this case the App widget) and
 // used by the build method of the State. Fields in a Widget subclass are
 // always marked "final".
 class PassportPage extends StatefulWidget {
@@ -57,6 +67,7 @@ class _PassportPageState extends State<PassportPage> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
 
+  // Load the page including certain external libraries needing initialization (mobile ads).
   @override
   void initState() {
     super.initState();
@@ -77,6 +88,7 @@ class _PassportPageState extends State<PassportPage> {
     });
   }
 
+  // Refreshes timer and the rest of the page while running calculations to confirm everything is still right.
   void _updateTime() {
      // Initialize values to calculate departure timezone for accurate counting and display.
     String rawTime = widget.flight.departDate.toString();
@@ -91,13 +103,17 @@ class _PassportPageState extends State<PassportPage> {
     // Calculate time until flight, using both times from the depart timezone, each second to keep the clock updated.
     Duration difference = tzDepartDate.difference(tzCurrentDate);
 
+    // Change background colour depending on how close the current time is to the departure; default is red.
     setState(() {
+      // When there is less than an hour and 30 minutes left, go up a priority, transitioning to yellow.
       if (difference.inMinutes < 90)  {
         _color = Colors.amberAccent[700];
       }
+      // When there is less than 45 minutes left, go up to the highest priority, transitioning to green.
       if (difference.inMinutes < 45) {
         _color = Colors.greenAccent[700];
       }
+      // When the flight has already left, for now, stop the countdown and remove priority colour.
       if (difference.inMinutes < 1 && difference.inSeconds < 1) {
         _color = Colors.black;
         difference = const Duration(hours: 0, minutes: 0, seconds: 0);
@@ -105,12 +121,11 @@ class _PassportPageState extends State<PassportPage> {
     });
   }
 
+  // Initialize an ad unit to be displayed in ad widgets.
   void loadAd() async {
-    // Try to initialize an ad unit to be displayed in ad widgets.
     // Only initialize ads on supported platforms.
     if (Platform.isAndroid || Platform.isIOS) {
-      // final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-      //   MediaQuery.sizeOf(context).width.truncate());
+      // Use different ad unit IDs depending on Android or otherwise (IoS); both are not real for testing purposes.
       _bannerAd = BannerAd(
         adUnitId: Platform.isAndroid
           ? 'ca-app-pub-3940256099942544/6300978111'
@@ -138,6 +153,7 @@ class _PassportPageState extends State<PassportPage> {
     super.dispose();
   }
 
+  // Navigate back to the previous or Timer page.
   void _timer() {
     Navigator.push(
       context,
@@ -147,10 +163,12 @@ class _PassportPageState extends State<PassportPage> {
     );
   }
 
+  // Preload the passport image from the system if it was already given one at some point and there was no deletion.
+  // Change the caption depending on this as well.
   Future<void> _loadPassportImage() async {
+    // Check persistent disk store for a specific path, which the passport upload is set to follow.
     final prefs = await SharedPreferences.getInstance();
     final path = prefs.getString('passport_image_path');
-
     if (path != null && await File(path).exists()) {
       setState(() {
         _passportImage = File(path);
@@ -164,28 +182,32 @@ class _PassportPageState extends State<PassportPage> {
     }
   }
 
+  // Facilitate the ability to upload an image from the gallery to the system for display and further reference.
   Future<void> _pickAndSaveImage() async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // Exit the function whenever there is no gallery image picked to upload.
     if (image == null) return;
 
+    // Create a path for storage and access of the uploaded image.
     final appDir = await getApplicationDocumentsDirectory();
     final newPath = '${appDir.path}/${image.name}';
     final newImage = await File(image.path).copy(newPath);
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('passport_image_path', newPath);
 
+    // Change the display values accordingly (passport image will replace dotted box).
     setState(() {
       _passportImage = newImage;
       fileUploadStatus = yesUpload;
     });
   }
 
+  // Remove a passport from storage.
   Future<void> _deleteImage() async {
     final prefs = await SharedPreferences.getInstance();
     final path = prefs.getString('passport_image_path');
-
+    // Only act if there is something on the passport path.
     if (path != null) {
       final file = File(path);
       if (await file.exists()) {
@@ -194,12 +216,14 @@ class _PassportPageState extends State<PassportPage> {
       await prefs.remove('passport_image_path');
     }
 
+    // Change the display values accordingly (dotted box will replace passport image).
     setState(() {
       _passportImage = null;
       fileUploadStatus = noUpload;
     });
   }
 
+  // Pop up a confirmation of deletion.
   Future<void> _confirmDelete() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -218,6 +242,7 @@ class _PassportPageState extends State<PassportPage> {
     }
   }
 
+  // Visual appearance of the app.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,14 +252,14 @@ class _PassportPageState extends State<PassportPage> {
           builder: (context, constraints) {
             return Column(
               children: [
-                // Main scrollable content
+                // Main scrollable content.
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Top icon
+                        // Top icon, the back button to view timer and flight details.
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -246,7 +271,8 @@ class _PassportPageState extends State<PassportPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 50),                        
+                        const SizedBox(height: 50),
+                        // Instructions that shift with the inclusion of a passport or not.                        
                         Text(
                           fileUploadStatus,
                           maxLines: 2,
@@ -255,8 +281,7 @@ class _PassportPageState extends State<PassportPage> {
                           style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                         ),
                         const SizedBox(height: 25),
-
-                        // Upload zone or preview
+                        // Upload or view passport zone, depending on the current state of the variable to hold it.
                         GestureDetector(
                           onTap: _pickAndSaveImage,
                           child: _passportImage != null
@@ -298,11 +323,10 @@ class _PassportPageState extends State<PassportPage> {
                     ),
                   ),
                 ),
-
-                // Ad pinned to bottom
+                // Ad pinned to bottom.
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: _bannerAd == null
+                  child: _isAdLoaded == false
                       ? const SizedBox(
                           width: 320,
                           height: 50,
@@ -320,5 +344,4 @@ class _PassportPageState extends State<PassportPage> {
       ),
     );
   }
-
 }
