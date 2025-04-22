@@ -72,6 +72,33 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
+  // Future<Flight?> _callFlightAPI(String iata) async {
+  //   // Simulate network delay
+  //   await Future.delayed(const Duration(milliseconds: 500));
+
+  //   // Mock flight data similar to what the real API returns
+  //   final mockJson = {
+  //     "flight": {
+  //       "iata": "AC117",
+  //       "icao": "ACA117",
+  //     },
+  //     "departure": {
+  //       "iata": "YYZ",
+  //       "airport": "Lester B. Pearson International",
+  //       "estimated": "2025-04-22T16:35:00+00:00",
+  //       "timezone": "America/Toronto",
+  //     },
+  //     "arrival": {
+  //       "iata": "YVR",
+  //       "airport": "Vancouver International",
+  //       "scheduled": "2025-04-22T18:39:00+00:00",
+  //       "timezone": "America/Vancouver",
+  //     }
+  //   };
+
+  //   return Flight.fromJson(mockJson);
+  // }
+
   // Validates the flight IATA a user enters.
   // First, it will see if anything was entered at all and relay a unique message for them to do so if not.
   // Then, it compares what the user entered to the RegEx which represents correct formatting.

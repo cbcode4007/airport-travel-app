@@ -94,30 +94,38 @@ class _TimerPageState extends State<TimerPage> {
   // Refreshes timer and the rest of the page while running calculations to confirm everything is still right.
   void _updateTime() {
     // Initialize values to calculate departure timezone for accurate counting and display.
-    String rawTime = widget.flight.departDate.toString();
+    String rawTimeString = widget.flight.departDate.toString();
     String tzName = widget.flight.departTimezone;
     // Parse the raw time without a timezone attached.
-    DateTime naiveLocalTime = DateTime.parse(rawTime);
+    DateTime rawTime = DateTime.parse(rawTimeString);
     // Look up the timezone location.
     var location = tz.getLocation(tzName);
     // Apply timezone to the naive time and DateTime.now() for counter calculation.
-    final tz.TZDateTime tzDepartDate = tz.TZDateTime.from(naiveLocalTime, location);
+    final tz.TZDateTime tzDepartDate = tz.TZDateTime.from(rawTime, location);
     final tz.TZDateTime tzCurrentDate = tz.TZDateTime.from(DateTime.now(), location);
 
     // Set day, month and year to how they are in the departure timezone.
     date = DateFormat.yMMMMd().format(tzDepartDate);
+
+    DateTime naiveLocalTimeNoUTC = DateTime.parse(widget.flight.departDate.toString().substring(0, 19));
     // Calculate time until flight, using both times from the depart timezone, each second to keep the clock updated.
-    Duration difference = tzDepartDate.difference(tzCurrentDate);
+    // Duration difference = tzDepartDate.difference(tzCurrentDate);
+    Duration difference = naiveLocalTimeNoUTC.difference(tzCurrentDate);
+    
+    print(difference);
+    print('D: $tzDepartDate');
+    print('C: $tzCurrentDate');
+    print('R: $naiveLocalTimeNoUTC');
 
     // Initialize values to calculate arrival timezone for accurate display.
-    rawTime = widget.flight.arriveDate.toString();
+    rawTimeString = widget.flight.arriveDate.toString();
     tzName = widget.flight.arriveTimezone;
     // Parse the raw time without a timezone attached.
-    naiveLocalTime = DateTime.parse(rawTime);
+    rawTime = DateTime.parse(rawTimeString);
     // Look up the timezone location.
     location = tz.getLocation(tzName);
     // Apply timezone to the naive time and DateTime.now() for calculation.
-    final tz.TZDateTime tzArriveDate = tz.TZDateTime.from(naiveLocalTime, location);
+    final tz.TZDateTime tzArriveDate = tz.TZDateTime.from(rawTime, location);
 
     // Change background colour depending on how close the current time is to the departure; default is red.
     setState(() {
@@ -145,13 +153,13 @@ class _TimerPageState extends State<TimerPage> {
       // Get the difference between current and departure times to display in readable format, or rather the timer.
       departTimer = _printDuration(difference);
       // Get the departure time to display.
-      departTime = DateFormat.jm().format(tzDepartDate);
+      departTime = DateFormat.jm().format(widget.flight.departDate);
       // Get the departure timezone's short form (e.g. EST) to display alongside it.
-      departCode = getAbbreviation(tzDepartDate, widget.flight.departTimezone);
+      departCode = getAbbreviation(widget.flight.departDate, widget.flight.departTimezone);
       // Get the arrival time to display.
-      arriveTime = DateFormat.jm().format(tzArriveDate);
+      arriveTime = DateFormat.jm().format(widget.flight.arriveDate);
       // Get the arrival timezone's short form (e.g. EST) to display alongside it.
-      arriveCode = getAbbreviation(tzArriveDate, widget.flight.arriveTimezone);
+      arriveCode = getAbbreviation(widget.flight.arriveDate, widget.flight.arriveTimezone);
     });
   }
 
