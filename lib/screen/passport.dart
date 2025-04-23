@@ -51,8 +51,6 @@ class PassportPage extends StatefulWidget {
 // This class controls all of the logic for the state of this widget.
 class _PassportPageState extends State<PassportPage> {
   // Variables to be updated in code later.
-  // Initially empty error message String for later assignment.
-  String errorMessage = 'Loading...';
   // Initialize the message that indicates whether passport should be uploaded or if there is and it can be expanded.
   String fileUploadStatus = '';
   String noUpload = 'Upload your passport to display it in the box below.';

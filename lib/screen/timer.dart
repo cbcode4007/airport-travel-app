@@ -30,6 +30,13 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+// Image uploading and display across page visits.
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+// Image placeholder area.
+import 'package:dotted_border/dotted_border.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title and flight) provided by the parent (in this case the App widget) and
@@ -51,8 +58,8 @@ class TimerPage extends StatefulWidget {
 
 // This class controls all of the logic for the state of this widget.
 class _TimerPageState extends State<TimerPage> {
-  // Variables to be updated in code later.
   // Declare and initialize information displays.
+  // The written priority status.
   String priority = '';
   // The time that appears in the departure column.
   String departTime = '';
@@ -68,40 +75,43 @@ class _TimerPageState extends State<TimerPage> {
   String departCode = '';
   // The abbreviation that appears behind arrival time.
   String arriveCode = '';
+
   // Declare the timer for constant updating of the program.
   late Timer _clockTimer;
-  // Initialize the background colour which changes at certain times.
-  Color? _color = Colors.red[400];
-
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  // Declare to-be image file for the user passport.
+  File? passportImage;  
+  // Initialize the background colour which changes at certain times.
+  Color? _color = Colors.red[400];
 
   // Load the page including certain external libraries needing initialization (timezones and mobile ads).
   @override
   void initState() {
     super.initState();
     tz.initializeTimeZones();
-    initialVariables();
+    // initialVariables();
     startTimer();
     updatePage();
+    loadPassportImage();
     MobileAds.instance.initialize();
     loadAd();
   }
 
   // Set declared variables that need to be initialized during runtime once but never changed after that.
-  void initialVariables() {
-    // Set day, month and year to how they are in the departure timezone.
-    date = DateFormat.yMMMMd().format(widget.flight.departDate);
-    // Get the departure time to display.
-    departTime = DateFormat.jm().format(widget.flight.departDate);
-    // Get the departure timezone's short form (e.g. EST) to display alongside it.
-    departCode = getAbbreviation(widget.flight.departDate, widget.flight.departTimezone);
-    // Get the arrival time to display.
-    arriveTime = DateFormat.jm().format(widget.flight.arriveDate);
-    // Get the arrival timezone's short form (e.g. EST) to display alongside it.
-    arriveCode = getAbbreviation(widget.flight.arriveDate, widget.flight.arriveTimezone);
-  }
+  // void initialVariables() {
+  //   // Set day, month and year to how they are in the departure timezone.
+  //   date = DateFormat.yMMMMd().format(widget.flight.departDate);
+  //   // Get the departure time to display.
+  //   departTime = DateFormat.jm().format(widget.flight.departDate);
+  //   // Get the departure timezone's short form (e.g. EST) to display alongside it.
+  //   departCode = getAbbreviation(widget.flight.departDate, widget.flight.departTimezone);
+  //   // Get the arrival time to display.
+  //   arriveTime = DateFormat.jm().format(widget.flight.arriveDate);
+  //   // Get the arrival timezone's short form (e.g. EST) to display alongside it.
+  //   arriveCode = getAbbreviation(widget.flight.arriveDate, widget.flight.arriveTimezone);
+  // }
 
   // Calls the function to update the page every second for a seamless timer and other current information.
   void startTimer() {
@@ -148,13 +158,13 @@ class _TimerPageState extends State<TimerPage> {
       }
     });
     // Get the difference between current and departure times to display in readable format, or rather the timer.
-    departTimer = _printDuration(difference);
+    departTimer = printDuration(difference);
     // Get the current local time to display in human readable format.
-    currentTime = DateFormat.jm().format(DateTime.now());
+    // currentTime = DateFormat.jm().format(DateTime.now());
   }
 
   // Format duration objects such as differences, specifically the timer, in human readable format.
-  String _printDuration(Duration duration) {
+  String printDuration(Duration duration) {
     // String negativeSign = duration.isNegative ? '-' : '';
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60).abs());
@@ -196,6 +206,77 @@ class _TimerPageState extends State<TimerPage> {
     }
   }
 
+  // Preload the passport image from the system if it was already given one at some point and there was no deletion.
+  // Change the caption depending on this as well.
+  Future<void> loadPassportImage() async {
+    // Check persistent disk store for a specific path, which the passport upload is set to follow.
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString('passport_image_path');
+    if (path != null && await File(path).exists()) {
+      setState(() {
+        passportImage = File(path);
+      });
+    }
+  }
+
+  // Facilitate the ability to upload an image from the gallery to the system for display and further reference.
+  Future<void> pickAndSaveImage() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // Exit the function whenever there is no gallery image picked to upload.
+    if (image == null) return;
+
+    // Create a path for storage and access of the uploaded image.
+    final appDir = await getApplicationDocumentsDirectory();
+    final newPath = '${appDir.path}/${image.name}';
+    final newImage = await File(image.path).copy(newPath);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('passport_image_path', newPath);
+
+    // Change the display values accordingly (passport image will replace dotted box).
+    setState(() {
+      passportImage = newImage;
+    });
+  }
+
+  // Remove a passport from storage.
+  Future<void> deleteImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString('passport_image_path');
+    // Only act if there is something on the passport path.
+    if (path != null) {
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      await prefs.remove('passport_image_path');
+    }
+
+    // Change the display values accordingly (dotted box will replace passport image).
+    setState(() {
+      passportImage = null;
+    });
+  }
+
+  // Pop up a confirmation of deletion.
+  Future<void> confirmDelete() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Passport Image'),
+        content: const Text('Are you sure you want to delete this image from the app?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await deleteImage();
+    }
+  }
+
   @override
   void dispose() {
     _clockTimer.cancel();
@@ -203,12 +284,12 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   // Navigate back to the first or Welcome page.
-  void _welcome() {
+  void welcomePage() {
     Navigator.pushNamed(context, '/');
   }
 
   // Navigate to the third or Passport page.
-  void _passport() {
+  void passportPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -230,7 +311,7 @@ class _TimerPageState extends State<TimerPage> {
                 // Top content (scrollable if needed).
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -240,21 +321,20 @@ class _TimerPageState extends State<TimerPage> {
                           children: [
                             // Back button to enter another flight IATA.
                             IconButton(
-                              onPressed: _welcome,
+                              onPressed: welcomePage,
                               icon: const Icon(Icons.arrow_back),
                               color: Colors.white,
                               iconSize: 50,
                             ),
                             // Passport button to add a passport image to view in the app.
                             IconButton(
-                              onPressed: _passport,
+                              onPressed: passportPage,
                               icon: const Icon(Icons.badge),
                               color: Colors.white,
                               iconSize: 50,
                             ),
                           ],
                         ),
-                        const SizedBox(height: 93),
                         // Timer heading & priority info.
                         Center(
                           child: Column(
@@ -269,100 +349,182 @@ class _TimerPageState extends State<TimerPage> {
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 15),
-                              Text(
-                                'It is $currentTime in your area.',
-                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                textAlign: TextAlign.center,
-                              ),
                               Text(
                                 priority,
                                 style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 25),
-                              Text(
-                                'Flight Details for ${widget.flight.flightIata}',
-                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                textAlign: TextAlign.center,
+                              passportImage != null
+                              ? Column(
+                                  children: [
+                                    const SizedBox(height: 35),
+                                    Image.file(
+                                      passportImage!,
+                                      width: 275,
+                                      height: 385,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    // const SizedBox(height: 15),
+                                    // IconButton(
+                                    //   onPressed: confirmDelete,
+                                    //   icon: const Icon(Icons.delete, color: Colors.white),
+                                    //   iconSize: 50,
+                                    // ),
+                                  ],
+                                )
+                              : Column(
+                                  children: [
+                                    const SizedBox(height: 35),
+                                    DottedBorder(
+                                      color: Colors.white,
+                                      child: SizedBox(
+                                        height: 385,
+                                        width: 275,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                'Upload your passport to display it here.',
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                              ),
+                                            ),                                            
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              const SizedBox(height: 15),
+                              // Upload or view passport zone, depending on the current state of the variable to hold it.
+                              passportImage != null
+                              ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: pickAndSaveImage,
+                                    child: const Icon(
+                                      Icons.file_upload_outlined,
+                                      color: Colors.white,
+                                      size: 50,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 25),
+                                  GestureDetector(
+                                    onTap: confirmDelete,
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Colors.white,
+                                      size: 50,
+                                    ),
+                                  ),
+                                ],
+                              )
+                              : GestureDetector(
+                                onTap: pickAndSaveImage,
+                                child: const Icon(
+                                  Icons.file_upload_outlined,
+                                  color: Colors.white,
+                                  size: 50,
+                                ),
                               ),
-                              Text(
-                                '($date)',
-                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                textAlign: TextAlign.center,
-                              ),
+                              // Text(
+                              //   'It is $currentTime in your area.',
+                              //   style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                              //   textAlign: TextAlign.center,
+                              // ),
+                              // Text(
+                              //   priority,
+                              //   style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                              //   textAlign: TextAlign.center,
+                              // ),
+                              // const SizedBox(height: 25),
+                              // Text(
+                              //   'Flight Details for ${widget.flight.flightIata}',
+                              //   style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                              //   textAlign: TextAlign.center,
+                              // ),
+                              // Text(
+                              //   '($date)',
+                              //   style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                              //   textAlign: TextAlign.center,
+                              // ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 5),
-                        // Flight details row.
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              // Departure information column.
-                              child: Column(
-                                children: [
-                                  const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '$departTime $departCode',
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    widget.flight.departNumber,
-                                    style: GoogleFonts.openSans(
-                                      color: Colors.white,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    widget.flight.departName,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 25),
-                            Expanded(
-                              // Arrival information column.
-                              child: Column(
-                                children: [
-                                  const Icon(Icons.flight_land, color: Colors.white, size: 50),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '$arriveTime $arriveCode',
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    widget.flight.arriveNumber,
-                                    style: GoogleFonts.openSans(
-                                      color: Colors.white,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    widget.flight.arriveName,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                        // const SizedBox(height: 5),
+                        // // Flight details row.
+                        // Row(
+                        //   crossAxisAlignment: CrossAxisAlignment.start,
+                        //   mainAxisAlignment: MainAxisAlignment.center,
+                        //   children: [
+                        //     Expanded(
+                        //       // Departure information column.
+                        //       child: Column(
+                        //         children: [
+                        //           const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
+                        //           const SizedBox(height: 8),
+                        //           Text(
+                        //             '$departTime $departCode',
+                        //             style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                        //             textAlign: TextAlign.center,
+                        //           ),
+                        //           Text(
+                        //             widget.flight.departNumber,
+                        //             style: GoogleFonts.openSans(
+                        //               color: Colors.white,
+                        //               fontSize: 25,
+                        //               fontWeight: FontWeight.bold,
+                        //             ),
+                        //             textAlign: TextAlign.center,
+                        //           ),
+                        //           Text(
+                        //             widget.flight.departName,
+                        //             maxLines: 3,
+                        //             overflow: TextOverflow.ellipsis,
+                        //             textAlign: TextAlign.center,
+                        //             style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 25),
+                        //     Expanded(
+                        //       // Arrival information column.
+                        //       child: Column(
+                        //         children: [
+                        //           const Icon(Icons.flight_land, color: Colors.white, size: 50),
+                        //           const SizedBox(height: 8),
+                        //           Text(
+                        //             '$arriveTime $arriveCode',
+                        //             style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                        //             textAlign: TextAlign.center,
+                        //           ),
+                        //           Text(
+                        //             widget.flight.arriveNumber,
+                        //             style: GoogleFonts.openSans(
+                        //               color: Colors.white,
+                        //               fontSize: 25,
+                        //               fontWeight: FontWeight.bold,
+                        //             ),
+                        //             textAlign: TextAlign.center,
+                        //           ),
+                        //           Text(
+                        //             widget.flight.arriveName,
+                        //             maxLines: 3,
+                        //             overflow: TextOverflow.ellipsis,
+                        //             textAlign: TextAlign.center,
+                        //             style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),
