@@ -30,6 +30,7 @@ import 'package:intl/intl.dart';
 // Timezone logic for correct displays.
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:instant/instant.dart';
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -117,13 +118,18 @@ class _DetailPageState extends State<DetailPage> {
   // Refreshes timer and the rest of the page while running calculations to confirm everything is still right.
   void updatePage() {
     // Time difference resolution (timer until departure).
+    // Set current date to how it is in the departure date timezone.
+    DateTime localDate = dateTimeToZone(zone: getAbbreviation(DateTime.now(), widget.flight.departTimezone), datetime: DateTime.now());
+
     // Get departure date as a string to strip the UTC characters off of the end and assume it is local.
-    String departDateString = widget.flight.departDate.toString();
-    String departDateNoUTCString = departDateString.substring(0,19);
+    // String departDateString = widget.flight.departDate.toString();
+    // String departDateNoUTCString = departDateString.substring(0,19);
     // Send the string back to a DateTime object for difference calculation with the current date object.
-    DateTime departDate = DateTime.parse(departDateNoUTCString);
+    // DateTime departDate = DateTime.parse(departDateNoUTCString);
     // Calculate time until flight, assuming the user is in the local timezone of the departure.
-    Duration difference = departDate.difference(DateTime.now());
+    // Duration difference = departDate.difference(DateTime.now());
+
+    Duration difference = widget.flight.departDate.difference(localDate);
 
     // UI updates.
     // Change background colour depending on how close the current time is to the departure; default is red.

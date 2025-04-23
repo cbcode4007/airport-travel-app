@@ -46,6 +46,7 @@ dependencies:
   window_manager: ^0.4.3
   timezone: ^0.10.0
   google_mobile_ads: ^3.0.0
+  instant: ^0.5.1
 
 
 dev_dependencies:

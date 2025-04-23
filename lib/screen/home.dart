@@ -50,7 +50,7 @@ class _WelcomePageState extends State<WelcomePage> {
   // Calls the AviationStack API and returns a Flight object from JSON that matches the key value (IATA) given.
   Future<Flight?> _callFlightAPI(String iata) async {
     // API Credentials.
-    const key = 'c1a9697f9b6263fffcb12a94543e68fa';
+    const key = 'a5cba517fdce175c2efdef4c6c2459e6';
     // Link to the request.
     String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
     // Pass a unique resource identifier object.
@@ -81,23 +81,22 @@ class _WelcomePageState extends State<WelcomePage> {
   //   // Mock flight data similar to what the real API returns
   //   final mockJson = {
   //     "flight": {
-  //       "iata": "AC117",
-  //       "icao": "ACA117",
+  //       "iata": "AC8192",
+  //       "icao": "ACA8192",
   //     },
   //     "departure": {
-  //       "iata": "YYZ",
-  //       "airport": "Lester B. Pearson International",
-  //       "estimated": "2025-04-22T16:35:00+00:00",
-  //       "timezone": "America/Toronto",
-  //     },
-  //     "arrival": {
   //       "iata": "YVR",
   //       "airport": "Vancouver International",
-  //       "scheduled": "2025-04-22T18:39:00+00:00",
+  //       "estimated": "2025-04-23T13:55:00+00:00",
   //       "timezone": "America/Vancouver",
+  //     },
+  //     "arrival": {
+  //       "iata": "YQR",
+  //       "airport": "Regina",
+  //       "scheduled": "2025-04-23T13:02:00+00:00",
+  //       "timezone": "America/Regina",
   //     }
   //   };
-
   //   return Flight.fromJson(mockJson);
   // }
 
