@@ -1,6 +1,7 @@
 /*
   Author:      Colin Bond
   File:        main.dart
+  
   Description: This file is at the center of the Airport Travel Application, being responsible for
                running it and navigating to its home page.
 */

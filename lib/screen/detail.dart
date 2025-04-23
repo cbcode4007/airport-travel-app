@@ -1,15 +1,15 @@
 /*
   Author:      Colin Bond
-  File:        passport.dart
+  File:        detail.dart
   
   Description: This file provides a hub and convenient display for users, presenting them with
                a timer until their flight begins departing, time in their device's local area,
                an explicit priority status informed by the background color which is checked
-               and switched accordingly every second, and finally a passport upload field 
-               for display with icons that allow for replacement or deletion.
+               and switched accordingly every second, and finally details about the flight.
                Above this, there are two buttons, one backing out to the previous screen so
                that a new flight number can be entered and another toggling a page where the user can
-               view their flight details instead, making it easily visible alongside their priority info.
+               upload their passport for in-app display as well as delete it instead,
+               making it easily visible alongside their priority info.
 */
 
 // Imported dependency packages.
@@ -18,31 +18,27 @@ import 'dart:async';
 // Platform detection.
 import 'dart:io';
 // Route to the next screen.
-import 'package:airport_travel_app/screen/detail.dart';
+import 'package:airport_travel_app/screen/passport.dart';
 // Flight data.
 import 'package:airport_travel_app/model/flight.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
 // Open Sans Font.
 import 'package:google_fonts/google_fonts.dart';
+// Date manipulation.
+import 'package:intl/intl.dart';
 // Timezone logic for correct displays.
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-// Image uploading and display across page visits.
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-// Image placeholder area.
-import 'package:dotted_border/dotted_border.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title and flight) provided by the parent (in this case the App widget) and
 // used by the build method of the State. Fields in a Widget subclass are
 // always marked "final".
-class PassportPage extends StatefulWidget {
-  const PassportPage({
+class DetailPage extends StatefulWidget {
+  const DetailPage({
     super.key,
     required this.title,
     required this.flight,
@@ -52,24 +48,32 @@ class PassportPage extends StatefulWidget {
   final Flight flight;
 
   @override
-  State<PassportPage> createState() => _PassportPageState();
+  State<DetailPage> createState() => _DetailPageState();
 }
 
 // This class controls all of the logic for the state of this widget.
-class _PassportPageState extends State<PassportPage> {
+class _DetailPageState extends State<DetailPage> {
   // Declare and initialize information displays.
   // The timer display.
   String departTimer = '';
   // The written priority status.
   String priority = '';
+  // The date that appears with the flight information, which will be of the departure.
+  String date = DateFormat.yMMMMd().format(DateTime.now());
+  // The time that appears in the departure column.
+  String departTime = '';
+  // The abbreviation that appears behind departure time.
+  String departCode = '';
+  // The time that appears in the arrival column.
+  String arriveTime = '';
+  // The abbreviation that appears behind arrival time.
+  String arriveCode = '';
 
   // Declare the timer for constant updating of the program.
   late Timer _clockTimer;
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
   BannerAd? _bannerAd;
-  bool _isAdLoaded = false;
-  // Declare to-be image file for the user passport.
-  File? passportImage;  
+  bool _isAdLoaded = false; 
   // Initialize the background colour which changes at certain times.
   Color? _color = Colors.red[400];
 
@@ -78,12 +82,25 @@ class _PassportPageState extends State<PassportPage> {
   void initState() {
     super.initState();
     tz.initializeTimeZones();
-    // initialVariables();
+    initialVariables();
     startTimer();
     updatePage();
-    loadPassportImage();
     MobileAds.instance.initialize();
     loadAd();
+  }
+
+  // Set declared variables that need to be initialized during runtime once but never changed after that.
+  void initialVariables() {
+    // Set day, month and year to how they are in the departure timezone.
+    date = DateFormat.yMMMMd().format(widget.flight.departDate);
+    // Get the departure time to display.
+    departTime = DateFormat.jm().format(widget.flight.departDate);
+    // Get the departure timezone's short form (e.g. EST) to display alongside it.
+    departCode = getAbbreviation(widget.flight.departDate, widget.flight.departTimezone);
+    // Get the arrival time to display.
+    arriveTime = DateFormat.jm().format(widget.flight.arriveDate);
+    // Get the arrival timezone's short form (e.g. EST) to display alongside it.
+    arriveCode = getAbbreviation(widget.flight.arriveDate, widget.flight.arriveTimezone);
   }
 
   // Calls the function to update the page every second for a seamless timer and other current information.
@@ -175,77 +192,6 @@ class _PassportPageState extends State<PassportPage> {
     }
   }
 
-  // Preload the passport image from the system if it was already given one at some point and there was no deletion.
-  // Change the caption depending on this as well.
-  Future<void> loadPassportImage() async {
-    // Check persistent disk store for a specific path, which the passport upload is set to follow.
-    final prefs = await SharedPreferences.getInstance();
-    final path = prefs.getString('passport_image_path');
-    if (path != null && await File(path).exists()) {
-      setState(() {
-        passportImage = File(path);
-      });
-    }
-  }
-
-  // Facilitate the ability to upload an image from the gallery to the system for display and further reference.
-  Future<void> pickAndSaveImage() async {
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    // Exit the function whenever there is no gallery image picked to upload.
-    if (image == null) return;
-
-    // Create a path for storage and access of the uploaded image.
-    final appDir = await getApplicationDocumentsDirectory();
-    final newPath = '${appDir.path}/${image.name}';
-    final newImage = await File(image.path).copy(newPath);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('passport_image_path', newPath);
-
-    // Change the display values accordingly (passport image will replace dotted box).
-    setState(() {
-      passportImage = newImage;
-    });
-  }
-
-  // Remove a passport from storage.
-  Future<void> deleteImage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final path = prefs.getString('passport_image_path');
-    // Only act if there is something on the passport path.
-    if (path != null) {
-      final file = File(path);
-      if (await file.exists()) {
-        await file.delete();
-      }
-      await prefs.remove('passport_image_path');
-    }
-
-    // Change the display values accordingly (dotted box will replace passport image).
-    setState(() {
-      passportImage = null;
-    });
-  }
-
-  // Pop up a confirmation of deletion.
-  Future<void> confirmDelete() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Passport Image'),
-        content: const Text('Are you sure you want to delete this image from the app?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await deleteImage();
-    }
-  }
-
   @override
   void dispose() {
     _clockTimer.cancel();
@@ -258,11 +204,11 @@ class _PassportPageState extends State<PassportPage> {
   }
 
   // Navigate to the third or Passport page.
-  void detailPage() {
+  void passportPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetailPage(title: 'detail', flight: widget.flight,),
+        builder: (context) => PassportPage(title: 'passport', flight: widget.flight,),
       )
     );
   }
@@ -297,8 +243,8 @@ class _PassportPageState extends State<PassportPage> {
                             ),
                             // Passport button to add a passport image to view in the app.
                             IconButton(
-                              onPressed: detailPage,
-                              icon: const Icon(Icons.flight),
+                              onPressed: passportPage,
+                              icon: const Icon(Icons.badge),
                               color: Colors.white,
                               iconSize: 50,
                             ),
@@ -323,80 +269,89 @@ class _PassportPageState extends State<PassportPage> {
                                 style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
-                              passportImage != null
-                              ? Column(
-                                  children: [
-                                    const SizedBox(height: 35),
-                                    Image.file(
-                                      passportImage!,
-                                      width: 275,
-                                      height: 385,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ],
-                                )
-                              : Column(
-                                  children: [
-                                    const SizedBox(height: 35),
-                                    DottedBorder(
-                                      color: Colors.white,
-                                      child: SizedBox(
-                                        height: 385,
-                                        width: 275,
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                'Upload your passport to display it here.',
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                                textAlign: TextAlign.center,
-                                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                              ),
-                                            ),                                            
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              const SizedBox(height: 15),
-                              // Upload or view passport zone, depending on the current state of the variable to hold it.
-                              passportImage != null
-                              ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: pickAndSaveImage,
-                                    child: const Icon(
-                                      Icons.file_upload_outlined,
-                                      color: Colors.white,
-                                      size: 50,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 25),
-                                  GestureDetector(
-                                    onTap: confirmDelete,
-                                    child: const Icon(
-                                      Icons.delete,
-                                      color: Colors.white,
-                                      size: 50,
-                                    ),
-                                  ),
-                                ],
-                              )
-                              : GestureDetector(
-                                onTap: pickAndSaveImage,
-                                child: const Icon(
-                                  Icons.file_upload_outlined,
-                                  color: Colors.white,
-                                  size: 50,
-                                ),
+                              const SizedBox(height: 100),
+                              Text(
+                                'Flight Details for ${widget.flight.flightIata}',
+                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                textAlign: TextAlign.center,
                               ),
+                              Text(
+                                '($date)',
+                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 25),
                             ],
                           ),
+                        ),
+                        const SizedBox(height: 5),
+                        // Flight details row.
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              // Departure information column.
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '$departTime $departCode',
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.departNumber,
+                                    style: GoogleFonts.openSans(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.departName,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 25),
+                            Expanded(
+                              // Arrival information column.
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.flight_land, color: Colors.white, size: 50),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '$arriveTime $arriveCode',
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.arriveNumber,
+                                    style: GoogleFonts.openSans(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    widget.flight.arriveName,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
