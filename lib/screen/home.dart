@@ -47,57 +47,57 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   // Calls the AviationStack API and returns a Flight object from JSON that matches the key value (IATA) given.
-  Future<Flight?> _callFlightAPI(String iata) async {
-    // API Credentials.
-    const key = 'c1a9697f9b6263fffcb12a94543e68fa';
-    // Link to the request.
-    String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
-    // Pass a unique resource identifier object.
-    final uri = Uri.parse(url);
-    final response = await http.get(uri);
-    // The request was successfully read and responded to.
-    if (response.statusCode == 200) {
-      final body = response.body;
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final data = json['data'] as List<dynamic>;
-      // What was returned is not an empty string, and should therefore be something in the API.
-      if (data.isNotEmpty) {
-        // Return only focused, important fields for this use case, incorporating them into the Flight model.
-        return Flight.fromJson(data.first);
-      } else {
-        return null;
-      }
-    } else {
-      throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
-    }
-  }
-
   // Future<Flight?> _callFlightAPI(String iata) async {
-  //   // Simulate network delay
-  //   await Future.delayed(const Duration(milliseconds: 500));
-
-  //   // Mock flight data similar to what the real API returns
-  //   final mockJson = {
-  //     "flight": {
-  //       "iata": "AC117",
-  //       "icao": "ACA117",
-  //     },
-  //     "departure": {
-  //       "iata": "YYZ",
-  //       "airport": "Lester B. Pearson International",
-  //       "estimated": "2025-04-22T16:35:00+00:00",
-  //       "timezone": "America/Toronto",
-  //     },
-  //     "arrival": {
-  //       "iata": "YVR",
-  //       "airport": "Vancouver International",
-  //       "scheduled": "2025-04-22T18:39:00+00:00",
-  //       "timezone": "America/Vancouver",
+  //   // API Credentials.
+  //   const key = 'c1a9697f9b6263fffcb12a94543e68fa';
+  //   // Link to the request.
+  //   String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
+  //   // Pass a unique resource identifier object.
+  //   final uri = Uri.parse(url);
+  //   final response = await http.get(uri);
+  //   // The request was successfully read and responded to.
+  //   if (response.statusCode == 200) {
+  //     final body = response.body;
+  //     final json = jsonDecode(body) as Map<String, dynamic>;
+  //     final data = json['data'] as List<dynamic>;
+  //     // What was returned is not an empty string, and should therefore be something in the API.
+  //     if (data.isNotEmpty) {
+  //       // Return only focused, important fields for this use case, incorporating them into the Flight model.
+  //       return Flight.fromJson(data.first);
+  //     } else {
+  //       return null;
   //     }
-  //   };
-
-  //   return Flight.fromJson(mockJson);
+  //   } else {
+  //     throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
+  //   }
   // }
+
+  Future<Flight?> _callFlightAPI(String iata) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // Mock flight data similar to what the real API returns
+    final mockJson = {
+      "flight": {
+        "iata": "AC117",
+        "icao": "ACA117",
+      },
+      "departure": {
+        "iata": "YYZ",
+        "airport": "Lester B. Pearson International",
+        "estimated": "2025-04-22T16:35:00+00:00",
+        "timezone": "America/Toronto",
+      },
+      "arrival": {
+        "iata": "YVR",
+        "airport": "Vancouver International",
+        "scheduled": "2025-04-22T18:39:00+00:00",
+        "timezone": "America/Vancouver",
+      }
+    };
+
+    return Flight.fromJson(mockJson);
+  }
 
   // Validates the flight IATA a user enters.
   // First, it will see if anything was entered at all and relay a unique message for them to do so if not.

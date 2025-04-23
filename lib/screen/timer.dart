@@ -54,12 +54,19 @@ class _TimerPageState extends State<TimerPage> {
   // Variables to be updated in code later.
   // Declare and initialize information displays.
   String priority = '';
+  // The time that appears in the departure column.
   String departTime = '';
+  // The time that appears in the arrival column.
   String arriveTime = '';
+  // The date that appears with the flight information, which will be of the departure.
   String date = DateFormat.yMMMMd().format(DateTime.now());
+  // The clock that appears under the timer for reference.
   String currentTime = DateFormat.Hm().format(DateTime.now());
+  // The timer display.
   String departTimer = '';
+  // The abbreviation that appears behind departure time.
   String departCode = '';
+  // The abbreviation that appears behind arrival time.
   String arriveCode = '';
   // Declare the timer for constant updating of the program.
   late Timer _clockTimer;
@@ -75,58 +82,50 @@ class _TimerPageState extends State<TimerPage> {
   void initState() {
     super.initState();
     tz.initializeTimeZones();
-    startClock();
-    _updateTime();
+    initialVariables();
+    startTimer();
+    updatePage();
     MobileAds.instance.initialize();
     loadAd();
   }
 
-  void startClock() {
+  // Set declared variables that need to be initialized during runtime once but never changed after that.
+  void initialVariables() {
+    // Set day, month and year to how they are in the departure timezone.
+    date = DateFormat.yMMMMd().format(widget.flight.departDate);
+    // Get the departure time to display.
+    departTime = DateFormat.jm().format(widget.flight.departDate);
+    // Get the departure timezone's short form (e.g. EST) to display alongside it.
+    departCode = getAbbreviation(widget.flight.departDate, widget.flight.departTimezone);
+    // Get the arrival time to display.
+    arriveTime = DateFormat.jm().format(widget.flight.arriveDate);
+    // Get the arrival timezone's short form (e.g. EST) to display alongside it.
+    arriveCode = getAbbreviation(widget.flight.arriveDate, widget.flight.arriveTimezone);
+  }
+
+  // Calls the function to update the page every second for a seamless timer and other current information.
+  void startTimer() {
     Future.delayed(const Duration(seconds: 0), () {
       if (!mounted) return;
 
       _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-        _updateTime();
+        updatePage();
       });
     });
   }
 
   // Refreshes timer and the rest of the page while running calculations to confirm everything is still right.
-  void _updateTime() {
-    // Initialize values to calculate departure timezone for accurate counting and display.
-    String rawTimeString = widget.flight.departDate.toString();
-    String tzName = widget.flight.departTimezone;
-    // Parse the raw time without a timezone attached.
-    DateTime rawTime = DateTime.parse(rawTimeString);
-    // Look up the timezone location.
-    var location = tz.getLocation(tzName);
-    // Apply timezone to the naive time and DateTime.now() for counter calculation.
-    final tz.TZDateTime tzDepartDate = tz.TZDateTime.from(rawTime, location);
-    final tz.TZDateTime tzCurrentDate = tz.TZDateTime.from(DateTime.now(), location);
+  void updatePage() {
+    // Time difference resolution (timer until departure).
+    // Get departure date as a string to strip the UTC characters off of the end and assume it is local.
+    String departDateString = widget.flight.departDate.toString();
+    String departDateNoUTCString = departDateString.substring(0,19);
+    // Send the string back to a DateTime object for difference calculation with the current date object.
+    DateTime departDate = DateTime.parse(departDateNoUTCString);
+    // Calculate time until flight, assuming the user is in the local timezone of the departure.
+    Duration difference = departDate.difference(DateTime.now());
 
-    // Set day, month and year to how they are in the departure timezone.
-    date = DateFormat.yMMMMd().format(tzDepartDate);
-
-    DateTime naiveLocalTimeNoUTC = DateTime.parse(widget.flight.departDate.toString().substring(0, 19));
-    // Calculate time until flight, using both times from the depart timezone, each second to keep the clock updated.
-    // Duration difference = tzDepartDate.difference(tzCurrentDate);
-    Duration difference = naiveLocalTimeNoUTC.difference(tzCurrentDate);
-    
-    print(difference);
-    print('D: $tzDepartDate');
-    print('C: $tzCurrentDate');
-    print('R: $naiveLocalTimeNoUTC');
-
-    // Initialize values to calculate arrival timezone for accurate display.
-    rawTimeString = widget.flight.arriveDate.toString();
-    tzName = widget.flight.arriveTimezone;
-    // Parse the raw time without a timezone attached.
-    rawTime = DateTime.parse(rawTimeString);
-    // Look up the timezone location.
-    location = tz.getLocation(tzName);
-    // Apply timezone to the naive time and DateTime.now() for calculation.
-    final tz.TZDateTime tzArriveDate = tz.TZDateTime.from(rawTime, location);
-
+    // UI updates.
     // Change background colour depending on how close the current time is to the departure; default is red.
     setState(() {
       // Default and lowest priority.
@@ -147,29 +146,21 @@ class _TimerPageState extends State<TimerPage> {
         priority = 'Your flight has already left.';
         difference = const Duration(hours: 0, minutes: 0, seconds: 0);
       }
-
-      // Get the current local time to display in human readable format.
-      currentTime = DateFormat.jm().format(DateTime.now());
-      // Get the difference between current and departure times to display in readable format, or rather the timer.
-      departTimer = _printDuration(difference);
-      // Get the departure time to display.
-      departTime = DateFormat.jm().format(widget.flight.departDate);
-      // Get the departure timezone's short form (e.g. EST) to display alongside it.
-      departCode = getAbbreviation(widget.flight.departDate, widget.flight.departTimezone);
-      // Get the arrival time to display.
-      arriveTime = DateFormat.jm().format(widget.flight.arriveDate);
-      // Get the arrival timezone's short form (e.g. EST) to display alongside it.
-      arriveCode = getAbbreviation(widget.flight.arriveDate, widget.flight.arriveTimezone);
     });
+    // Get the difference between current and departure times to display in readable format, or rather the timer.
+    departTimer = _printDuration(difference);
+    // Get the current local time to display in human readable format.
+    currentTime = DateFormat.jm().format(DateTime.now());
   }
 
   // Format duration objects such as differences, specifically the timer, in human readable format.
   String _printDuration(Duration duration) {
-    String negativeSign = duration.isNegative ? '-' : '';
+    // String negativeSign = duration.isNegative ? '-' : '';
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60).abs());
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60).abs());
-    return "$negativeSign${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+    // return "$negativeSign${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 
   // Get the short form or code of a given timezone using the timezone import database.
