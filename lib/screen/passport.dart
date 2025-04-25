@@ -19,16 +19,10 @@ import 'dart:async';
 import 'dart:io';
 // Route to the next screen.
 import 'package:airport_travel_app/screen/detail.dart';
-// Flight data.
-import 'package:airport_travel_app/model/flight.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
 // Open Sans Font.
 import 'package:google_fonts/google_fonts.dart';
-// Timezone logic for correct displays.
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-import 'package:instant/instant.dart';
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 // Image uploading and display across page visits.
@@ -46,11 +40,9 @@ class PassportPage extends StatefulWidget {
   const PassportPage({
     super.key,
     required this.title,
-    required this.flight,
   });
 
   final String title;
-  final Flight flight;
 
   @override
   State<PassportPage> createState() => _PassportPageState();
@@ -78,82 +70,8 @@ class _PassportPageState extends State<PassportPage> {
   @override
   void initState() {
     super.initState();
-    tz.initializeTimeZones();
-    // initialVariables();
-    startTimer();
-    updatePage();
-    loadPassportImage();
     MobileAds.instance.initialize();
     loadAd();
-  }
-
-  // Calls the function to update the page every second for a seamless timer and other current information.
-  void startTimer() {
-    Future.delayed(const Duration(seconds: 0), () {
-      if (!mounted) return;
-
-      _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-        updatePage();
-      });
-    });
-  }
-
-  // Refreshes timer and the rest of the page while running calculations to confirm everything is still right.
-  void updatePage() {
-    // Time difference resolution (timer until departure).
-    // Set current date to how it is in the departure date timezone.
-    DateTime localDate = dateTimeToZone(zone: getAbbreviation(DateTime.now(), widget.flight.departTimezone), datetime: DateTime.now());
-
-    // Get departure date as a string to strip the UTC characters off of the end and assume it is local.
-    // String departDateString = widget.flight.departDate.toString();
-    // String departDateNoUTCString = departDateString.substring(0,19);
-    // Send the string back to a DateTime object for difference calculation with the current date object.
-    // DateTime departDate = DateTime.parse(departDateNoUTCString);
-    // Calculate time until flight, assuming the user is in the local timezone of the departure.
-    // Duration difference = departDate.difference(DateTime.now());
-
-    Duration difference = widget.flight.departDate.difference(localDate);
-
-    // UI updates.
-    // Change background colour depending on how close the current time is to the departure; default is red.
-    setState(() {
-      // Default and lowest priority.
-      priority = 'Your priority status is Priority 3.';
-      // When there is less than an hour and 30 minutes left, go up a priority, transitioning to yellow.
-      if (difference.inMinutes < 90)  {
-        _color = Colors.amberAccent[700];
-        priority = 'Your priority status is Priority 2.';
-      }
-      // When there is less than 45 minutes left, go up to the highest priority, transitioning to green.
-      if (difference.inMinutes < 45) {
-        _color = Colors.greenAccent[700];
-        priority = 'Your priority status is Priority 1.';
-      }
-      // When the flight has already left, for now, stop the countdown and remove priority as well as colour.
-      if (difference.inMinutes < 1 && difference.inSeconds < 1) {
-        _color = Colors.black;
-        priority = 'Your flight has already left.';
-        difference = const Duration(hours: 0, minutes: 0, seconds: 0);
-      }
-    });
-    // Get the difference between current and departure times to display in readable format, or rather the timer.
-    departTimer = printDuration(difference);
-  }
-
-  // Format duration objects such as differences, specifically the timer, in human readable format.
-  String printDuration(Duration duration) {
-    // String negativeSign = duration.isNegative ? '-' : '';
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60).abs());
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60).abs());
-    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
-  }
-
-  // Get the short form or code of a given timezone using the timezone import database.
-  String getAbbreviation(DateTime utcTime, String timeZone) {
-    final location = tz.getLocation(timeZone);
-    final tzTime = tz.TZDateTime.from(utcTime, location);
-    return tzTime.timeZoneName;
   }
 
   // Initialize an ad unit to be displayed in ad widgets.
@@ -264,13 +182,13 @@ class _PassportPageState extends State<PassportPage> {
   }
 
   // Navigate to the third or Passport page.
-  void detailPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetailPage(title: 'detail', flight: widget.flight,),
-      )
-    );
+  void numberPage() {
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => NumberPage(title: 'detail'),
+    //   )
+    // );
   }
 
   // Visual appearance of the app.
@@ -303,7 +221,7 @@ class _PassportPageState extends State<PassportPage> {
                             ),
                             // Passport button to add a passport image to view in the app.
                             IconButton(
-                              onPressed: detailPage,
+                              onPressed: numberPage,
                               icon: const Icon(Icons.flight),
                               color: Colors.white,
                               iconSize: 50,

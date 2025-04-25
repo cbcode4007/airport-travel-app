@@ -25,15 +25,15 @@ import 'package:http/http.dart' as http;
 // case the title) provided by the parent (in this case the App widget) and
 // used by the build method of the State. Fields in a Widget subclass are
 // always marked "final".
-class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key, required this.title});
+class NumberPage extends StatefulWidget {
+  const NumberPage({super.key, required this.title});
   final String title;
   @override
-  State<WelcomePage> createState() => _WelcomePageState();
+  State<NumberPage> createState() => _NumberPageState();
 }
 
 // This class controls all of the logic for the state of this widget.
-class _WelcomePageState extends State<WelcomePage> {
+class _NumberPageState extends State<NumberPage> {
   // Initially empty error message String for later assignment.
   String errorMessage = '';
   // Controller for flight IATA text field extraction and clearing.
@@ -121,12 +121,12 @@ class _WelcomePageState extends State<WelcomePage> {
           if (!mounted) return;
           // Take a returned Flight whose IATA matches the entry and navigate to next page with it as a parameter.
           if (matchedFlight != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PassportPage(title: 'passport', flight: matchedFlight,),
-              )
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => TicketPage(title: 'passport', flight: matchedFlight,),
+            //   )
+            // );
           }
           else {
             errorMessage = errorMessageCall;
@@ -213,7 +213,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
               // Welcome heading.
               Text(
-                'Welcome!',
+                'Catch your Flight',
                 style: GoogleFonts.openSans(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

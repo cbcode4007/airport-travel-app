@@ -120,15 +120,6 @@ class _DetailPageState extends State<DetailPage> {
     // Time difference resolution (timer until departure).
     // Set current date to how it is in the departure date timezone.
     DateTime localDate = dateTimeToZone(zone: getAbbreviation(DateTime.now(), widget.flight.departTimezone), datetime: DateTime.now());
-
-    // Get departure date as a string to strip the UTC characters off of the end and assume it is local.
-    // String departDateString = widget.flight.departDate.toString();
-    // String departDateNoUTCString = departDateString.substring(0,19);
-    // Send the string back to a DateTime object for difference calculation with the current date object.
-    // DateTime departDate = DateTime.parse(departDateNoUTCString);
-    // Calculate time until flight, assuming the user is in the local timezone of the departure.
-    // Duration difference = departDate.difference(DateTime.now());
-
     Duration difference = widget.flight.departDate.difference(localDate);
 
     // UI updates.
@@ -211,12 +202,12 @@ class _DetailPageState extends State<DetailPage> {
 
   // Navigate to the third or Passport page.
   void passportPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PassportPage(title: 'passport', flight: widget.flight,),
-      )
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => PassportPage(title: 'passport', flight: widget.flight,),
+    //   )
+    // );
   }
 
   // Visual appearance of the app.

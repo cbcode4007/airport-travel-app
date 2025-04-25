@@ -10,7 +10,7 @@
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
 // Route to the next screen.
-import 'package:airport_travel_app/screen/home.dart';
+import 'package:airport_travel_app/screen/login.dart';
 
 void main() {
   runApp(const AirportTravelApp());
@@ -22,9 +22,14 @@ class AirportTravelApp extends StatelessWidget {
   // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       // Navigate to the first or Welcome page.
-      home: WelcomePage(title: 'home'),
+      home: const LoginPage(title: 'login'),
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.blueGrey[50],        
+        dialogTheme: DialogTheme(backgroundColor: Colors.blueGrey[50], iconColor: Colors.lightBlue, ),
+        textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.lightBlue),
+      ),
     );
   }
 }
