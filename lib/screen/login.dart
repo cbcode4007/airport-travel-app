@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   // The email or password does not match a retrieved account record.
   String errorMessageNoMatch = 'Your email or password is invalid.';
   // Strings for the Show password button to change to Hide if it is visible and vice versa.
-  String passwordVisibleString = '';
+  String passwordVisibleString = 'Show';
   String passwordVisibleStringYes = 'Hide';
   String passwordVisibleStringNo = 'Show';
   // Bool for whether the password is visible or not.
@@ -146,8 +146,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           actions: <Widget>[
             TextButton(
-              style: ButtonStyle(overlayColor: WidgetStatePropertyAll<Color?>(Colors.blue[100])),
-              child: const Text('OK', style: TextStyle(color: Colors.lightBlue)),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -231,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       // Email input.
                       const SizedBox(
-                        width: 280,
+                        width: 280,                        
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -248,7 +247,7 @@ class _LoginPageState extends State<LoginPage> {
                           style: const TextStyle(color: Colors.blueGrey, fontSize: 15),
                           cursorColor: Colors.blueGrey[200],
                           decoration: InputDecoration(
-                            hintText: 'example@example.example',
+                            hintText: 'example@email.com',
                             hintStyle: TextStyle(
                               color: Colors.blueGrey[200], fontSize: 15, fontWeight: FontWeight.normal
                             ),
@@ -283,11 +282,14 @@ class _LoginPageState extends State<LoginPage> {
                           style: const TextStyle(color: Colors.blueGrey, fontSize: 15),
                           cursorColor: Colors.blueGrey[200],
                           decoration: InputDecoration(
-                            suffix: GestureDetector(
+                            suffixIcon: InkWell(
                               onTap: _showOrHidePassword,
-                              child: Text(
-                                passwordVisibleString,
-                                style: const TextStyle(color: Colors.lightBlue, fontSize: 15),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Text(
+                                  passwordVisibleString,
+                                  style: const TextStyle(color: Colors.lightBlue, fontSize: 15),
+                                ),
                               ),
                             ),
                             enabledBorder: const OutlineInputBorder(
@@ -301,7 +303,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 50),
 
-                      // Login button.
+                      // Log in button.
                       TextButton(
                         onPressed: () {
                           _login(_emailController.text, _passwordController.text);

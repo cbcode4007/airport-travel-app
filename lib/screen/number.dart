@@ -11,13 +11,11 @@
 // Encode and decode JSON for processing.
 import 'dart:convert';
 // Route to the next screen.
-import 'package:airport_travel_app/screen/passport.dart';
+import 'package:airport_travel_app/screen/ticket.dart';
 // Translate raw JSON into Flight objects that can be further processed.
 import 'package:airport_travel_app/model/flight.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
-// Open Sans Font with readability and a modern feel.
-import 'package:google_fonts/google_fonts.dart';
 // API calls, retrieving crucial information about a specified flight.
 import 'package:http/http.dart' as http;
 
@@ -48,57 +46,57 @@ class _NumberPageState extends State<NumberPage> {
   }
 
   // Calls the AviationStack API and returns a Flight object from JSON that matches the key value (IATA) given.
-  Future<Flight?> _callFlightAPI(String iata) async {
-    // API Credentials.
-    const key = 'a5cba517fdce175c2efdef4c6c2459e6';
-    // Link to the request.
-    String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
-    // Pass a unique resource identifier object.
-    final uri = Uri.parse(url);
-    final response = await http.get(uri);
-    // The request was successfully read and responded to.
-    if (response.statusCode == 200) {
-      final body = response.body;
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final data = json['data'] as List<dynamic>;
-      // What was returned is not an empty string, and should therefore be something in the API.
-      if (data.isNotEmpty) {
-        // Return only focused, important fields for this use case, incorporating them into the Flight model.
-        return Flight.fromJson(data.first);
-      } else {
-        return null;
-      }
-    } else {
-      throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
-    }
-  }
+  // Future<Flight?> _callFlightAPI(String iata) async {
+  //   // API Credentials.
+  //   const key = 'a5cba517fdce175c2efdef4c6c2459e6';
+  //   // Link to the request.
+  //   String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
+  //   // Pass a unique resource identifier object.
+  //   final uri = Uri.parse(url);
+  //   final response = await http.get(uri);
+  //   // The request was successfully read and responded to.
+  //   if (response.statusCode == 200) {
+  //     final body = response.body;
+  //     final json = jsonDecode(body) as Map<String, dynamic>;
+  //     final data = json['data'] as List<dynamic>;
+  //     // What was returned is not an empty string, and should therefore be something in the API.
+  //     if (data.isNotEmpty) {
+  //       // Return only focused, important fields for this use case, incorporating them into the Flight model.
+  //       return Flight.fromJson(data.first);
+  //     } else {
+  //       return null;
+  //     }
+  //   } else {
+  //     throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
+  //   }
+  // }
 
   // Return a preset Flight object made out of mock data for testing.
-  // Future<Flight?> _callFlightAPI(String iata) async {
-  //   // Simulate network delay
-  //   await Future.delayed(const Duration(milliseconds: 500));
+  Future<Flight?> _callFlightAPI(String iata) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
 
-  //   // Mock flight data similar to what the real API returns
-  //   final mockJson = {
-  //     "flight": {
-  //       "iata": "AC8192",
-  //       "icao": "ACA8192",
-  //     },
-  //     "departure": {
-  //       "iata": "YVR",
-  //       "airport": "Vancouver International",
-  //       "estimated": "2025-04-23T13:55:00+00:00",
-  //       "timezone": "America/Vancouver",
-  //     },
-  //     "arrival": {
-  //       "iata": "YQR",
-  //       "airport": "Regina",
-  //       "scheduled": "2025-04-23T13:02:00+00:00",
-  //       "timezone": "America/Regina",
-  //     }
-  //   };
-  //   return Flight.fromJson(mockJson);
-  // }
+    // Mock flight data similar to what the real API returns
+    final mockJson = {
+      "flight": {
+        "iata": "AC8192",
+        "icao": "ACA8192",
+      },
+      "departure": {
+        "iata": "YVR",
+        "airport": "Vancouver International",
+        "estimated": "2025-04-25T13:55:00+00:00",
+        "timezone": "America/Vancouver",
+      },
+      "arrival": {
+        "iata": "YQR",
+        "airport": "Regina",
+        "scheduled": "2025-04-25T13:02:00+00:00",
+        "timezone": "America/Regina",
+      }
+    };
+    return Flight.fromJson(mockJson);
+  }
 
   // Validates the flight IATA a user enters.
   // First, it will see if anything was entered at all and relay a unique message for them to do so if not.
@@ -121,16 +119,16 @@ class _NumberPageState extends State<NumberPage> {
           if (!mounted) return;
           // Take a returned Flight whose IATA matches the entry and navigate to next page with it as a parameter.
           if (matchedFlight != null) {
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => TicketPage(title: 'passport', flight: matchedFlight,),
-            //   )
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TicketPage(title: 'ticket', flight: matchedFlight,),
+              )
+            );
           }
           else {
             errorMessage = errorMessageCall;
-            _spawnErrorMessage(errorMessage, 100);
+            _spawnErrorMessage(errorMessage);
           } 
 
         } 
@@ -140,49 +138,43 @@ class _NumberPageState extends State<NumberPage> {
       }
       else {
         errorMessage = errorMessageFormat;
-        _spawnErrorMessage(errorMessage, 150);
+        _spawnErrorMessage(errorMessage);
       }
     }
     else {
       errorMessage = errorMessageEmpty;
-      _spawnErrorMessage(errorMessage, 100);
+      _spawnErrorMessage(errorMessage);
     }
   }
 
   // Creates a visually striking error message tailored to the situation at the bottom of the screen.
-  void _spawnErrorMessage (String error, double height) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        content: Container(
-          padding: const EdgeInsets.all(8),
-          height: height,
-          decoration: const BoxDecoration(
-            color: Color(0xFFC72C41),
-            borderRadius: BorderRadius.all(Radius.circular(20))
+  Future<void> _spawnErrorMessage(String error) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(error),
+              ],
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "An error has occurred!",
-                style: TextStyle(fontSize: 17, color: Colors.white)
-              ),
-              // Dynamic error display that changes depending on what went wrong.
-              Text(
-                error,
-                style: const TextStyle(fontSize: 11, color: Colors.white)
-              ),
-            ],
-          ),
-        )
-      )
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
-  // Visual appearance of the app.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,104 +183,97 @@ class _NumberPageState extends State<NumberPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Spacer(flex: 2),
 
-              // Logo area.
-              ClipRRect(
-                borderRadius: BorderRadius.circular(100.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/logo.png'),
-                    ),
-                  ),
-                ),
+              // Logo
+              const Icon(
+                Icons.flight,
+                color: Colors.white,
+                size: 75,
+              ),
+              const SizedBox(height: 15),
+
+              const Text(
+                'Step 2 of 3',
+                style: TextStyle(color: Colors.white, fontSize: 15),
+                textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 16),
-
-              // Welcome heading.
-              Text(
+              const Text(
                 'Catch your Flight',
-                style: GoogleFonts.openSans(
+                textAlign: TextAlign.center,
+                style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 27,
+                  fontSize: 25,
                 ),
+              ),
+
+              const SizedBox(height: 15),
+
+              const Text(
+                'Please enter your\nflight number below.',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: 24),
 
-              // Instructions body text.
-              Column(
-                children: [
-                  Text(
-                    'Please enter your',
-                    style: GoogleFonts.openSans(
-                      color: Colors.white,
-                      fontSize: 15,
-                    ),
-                  ),
-                  Text(
-                    'IATA flight number below.',
-                    style: GoogleFonts.openSans(
-                      color: Colors.white,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Flight IATA input bar with an initial example.
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _controller,
-                  style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                  cursorColor: Colors.white,
-                  decoration: InputDecoration(
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white70),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    hintText: 'AAA####',
-                    hintStyle: GoogleFonts.openSans(
-                      color: Colors.white70,
-                      fontSize: 15,
+              // Input box
+              Center(
+                child: SizedBox(
+                  width: 280,
+                  child: TextField(
+                    controller: _controller,
+                    style: const TextStyle(color: Colors.white, fontSize: 15),
+                    cursorColor: Colors.white,
+                    decoration: const InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white70),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      hintText: 'AAA####',
+                      hintStyle: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 25),
 
-              // Submit flight IATA entry button.
-              TextButton(
-                onPressed: () {
-                  _validateFlightInput(_controller.text);
-                  _controller.clear();
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  fixedSize: const Size(150, 40),
-                ),
-                child: Text(
-                  'SUBMIT',
-                  style: GoogleFonts.openSans(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.lightBlue,
+              // Submit button
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    _validateFlightInput(_controller.text);
+                    _controller.clear();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    fixedSize: const Size(150, 40),
+                  ),
+                  child: const Text(
+                    'Submit',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.lightBlue,
+                    ),
                   ),
                 ),
               ),
+
               const Spacer(flex: 3),
             ],
           ),

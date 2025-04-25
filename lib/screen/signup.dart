@@ -14,8 +14,6 @@ import 'package:flutter/gestures.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:io';
 // Route to other screens.
-// Sign up screen.
-import 'package:airport_travel_app/screen/login.dart';
 // Passport screen.
 import 'package:airport_travel_app/screen/passport.dart';
 
@@ -46,7 +44,7 @@ class _SignupPageState extends State<SignupPage> {
   // The database could not be consulted for whatever reason.
   String errorMessageNoCall = 'Could not retrieve data from system. Please try again later.';
   // Strings for the Show password button to change to Hide if it is visible and vice versa.
-  String passwordVisibleString = '';
+  String passwordVisibleString = 'Show';
   String passwordVisibleStringYes = 'Hide';
   String passwordVisibleStringNo = 'Show';
   // Bool for whether the password is visible or not.
@@ -146,8 +144,7 @@ class _SignupPageState extends State<SignupPage> {
           ),
           actions: <Widget>[
             TextButton(
-              style: ButtonStyle(overlayColor: WidgetStatePropertyAll<Color?>(Colors.blue[100])),
-              child: const Text('OK', style: TextStyle(color: Colors.lightBlue)),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -173,12 +170,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void _loginPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(title: 'login'),
-      )
-    );
+    Navigator.pushNamed(context, '/');
   }
 
   void _passportPage() {
@@ -248,7 +240,7 @@ class _SignupPageState extends State<SignupPage> {
                           style: const TextStyle(color: Colors.blueGrey, fontSize: 15),
                           cursorColor: Colors.blueGrey[200],
                           decoration: InputDecoration(
-                            hintText: 'example@example.example',
+                            hintText: 'example@email.com',
                             hintStyle: TextStyle(
                               color: Colors.blueGrey[200], fontSize: 15, fontWeight: FontWeight.normal
                             ),
@@ -283,11 +275,14 @@ class _SignupPageState extends State<SignupPage> {
                           style: const TextStyle(color: Colors.blueGrey, fontSize: 15),
                           cursorColor: Colors.blueGrey[200],
                           decoration: InputDecoration(
-                            suffix: GestureDetector(
+                            suffixIcon: InkWell(
                               onTap: _showOrHidePassword,
-                              child: Text(
-                                passwordVisibleString,
-                                style: const TextStyle(color: Colors.lightBlue, fontSize: 15),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Text(
+                                  passwordVisibleString,
+                                  style: const TextStyle(color: Colors.lightBlue, fontSize: 15),
+                                ),
                               ),
                             ),
                             enabledBorder: const OutlineInputBorder(
@@ -301,7 +296,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       const SizedBox(height: 50),
 
-                      // Login button.
+                      // Sign up button.
                       TextButton(
                         onPressed: () {
                           _signup(_emailController.text, _passwordController.text);
@@ -321,12 +316,12 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       const SizedBox(height: 10),
 
-                      // Sign up link.
+                      // Log in link.
                       RichText(
                         text: TextSpan(
                           children: [
                             const TextSpan(
-                              text: 'Don\'t have an account? ',
+                              text: 'Already have an account? ',
                               style: TextStyle(color: Colors.blueGrey),
                             ),
                             TextSpan(

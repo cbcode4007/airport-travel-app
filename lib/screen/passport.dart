@@ -21,8 +21,6 @@ import 'dart:io';
 import 'package:airport_travel_app/screen/number.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
-// Open Sans Font.
-import 'package:google_fonts/google_fonts.dart';
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 // Image uploading and display across page visits.
@@ -52,19 +50,15 @@ class PassportPage extends StatefulWidget {
 class _PassportPageState extends State<PassportPage> {
   // Declare and initialize information displays.
   // Strings for the passport status message to change depending on if one was uploaded or not.
-  String passportMessage = '';
-  String passportMessageNoUpload = 'Please upload your passport to continue.';
+  String passportMessage = 'Please tap below to select your passport.';
+  String passportMessageNoUpload = 'Please tap below to select your passport.';
   String passportMessageYesUpload = 'Tap on your passport to replace it.';
 
-  // Declare the timer for constant updating of the program.
-  late Timer _clockTimer;
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
   // Declare to-be image file for the user passport.
-  File? passportImage;  
-  // Initialize the background colour which changes at certain times.
-  Color? _color = Colors.red[400];
+  File? passportImage;
 
   // Load the page including certain external libraries needing initialization (timezones and mobile ads).
   @override
@@ -106,8 +100,14 @@ class _PassportPageState extends State<PassportPage> {
     final prefs = await SharedPreferences.getInstance();
     final path = prefs.getString('passport_image_path');
     if (path != null && await File(path).exists()) {
-      setState(() {
+      setState(() {        
         passportImage = File(path);
+        passportMessage = passportMessageYesUpload;
+      });
+    }
+    else {
+      setState(() {
+        passportMessage = passportMessageNoUpload;
       });
     }
   }
@@ -129,6 +129,7 @@ class _PassportPageState extends State<PassportPage> {
     // Change the display values accordingly (passport image will replace dotted box).
     setState(() {
       passportImage = newImage;
+      passportMessage = passportMessageYesUpload;
     });
   }
 
@@ -148,6 +149,7 @@ class _PassportPageState extends State<PassportPage> {
     // Change the display values accordingly (dotted box will replace passport image).
     setState(() {
       passportImage = null;
+      passportMessage = passportMessageNoUpload;
     });
   }
 
@@ -156,46 +158,79 @@ class _PassportPageState extends State<PassportPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Passport Image'),
+        title: const Text('Delete'),
         content: const Text('Are you sure you want to delete this image from the app?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
         ],
       ),
-    );
+    );    
 
     if (confirm == true) {
       await deleteImage();
     }
   }
 
+  // Pop up a confirmation for logging out.
+  Future<void> confirmLogout() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to log out?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                _loginPage();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
-    _clockTimer.cancel();
     super.dispose();
   }
 
   // Navigate back to the first or Welcome page.
-  void welcomePage() {
+  void _loginPage() {
     Navigator.pushNamed(context, '/');
   }
 
-  // Navigate to the third or Passport page.
-  void numberPage() {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => NumberPage(title: 'detail'),
-    //   )
-    // );
+  // Navigate to the third or Flight Number page.
+  void _numberPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NumberPage(title: 'number'),
+      )
+    );
   }
 
   // Visual appearance of the app.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _color,
+      backgroundColor: Colors.lightBlue,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -212,17 +247,10 @@ class _PassportPageState extends State<PassportPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Back button to enter another flight IATA.
+                            // Back button to log out of account and be able to log in again.
                             IconButton(
-                              onPressed: welcomePage,
-                              icon: const Icon(Icons.arrow_back),
-                              color: Colors.white,
-                              iconSize: 50,
-                            ),
-                            // Passport button to add a passport image to view in the app.
-                            IconButton(
-                              onPressed: numberPage,
-                              icon: const Icon(Icons.flight),
+                              onPressed: confirmLogout,
+                              icon: const Icon(Icons.logout),
                               color: Colors.white,
                               iconSize: 50,
                             ),
@@ -233,88 +261,88 @@ class _PassportPageState extends State<PassportPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'Welcome!',
-                                style: GoogleFonts.openSans(
+                              const Text (
+                                'Step 1 of 3',
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 50,
+                                )
+                              ),                                                          
+                              const Text(
+                                'Welcome!',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 30,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              Text(
-                                passportMessage,
-                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                textAlign: TextAlign.center,
-                              ),
-                              passportImage != null
-                              ? Column(
-                                  children: [
-                                    const SizedBox(height: 35),
-                                    Image.file(
-                                      passportImage!,
-                                      width: 275,
-                                      height: 385,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ],
-                                )
-                              : Column(
-                                  children: [
-                                    const SizedBox(height: 35),
-                                    DottedBorder(
-                                      color: Colors.white,
-                                      child: SizedBox(
-                                        height: 385,
-                                        width: 275,                                        
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                'Upload your passport to display it here.',
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                                textAlign: TextAlign.center,
-                                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
-                                              ),
-                                            ),                                            
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              const SizedBox(height: 5),                              
+                              SizedBox(
+                                width: 280,
+                                child: Text(
+                                  passportMessage,
+                                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                                  textAlign: TextAlign.center,
                                 ),
-                              const SizedBox(height: 15),
+                              ),
+                              const SizedBox(height: 20),
+                              GestureDetector(
+                                onTap: pickAndSaveImage,
+                                child: passportImage != null
+                                ? Column(
+                                    children: [                                    
+                                      Image.file(
+                                        passportImage!,
+                                        width: 275,
+                                        height: 385,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    children: [                                    
+                                      DottedBorder(
+                                        color: Colors.white,
+                                        child: const SizedBox(
+                                          height: 385,
+                                          width: 275,                                        
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.file_upload_outlined,
+                                                color: Colors.white,
+                                                size: 50,
+                                              ),                                                                                        
+                                            ],
+                                          ),
+                                        ),
+                                      ),                                    
+                                    ],
+                                  ),
+                              ),
+                              const SizedBox(height: 10),
                               // Upload or view passport zone, depending on the current state of the variable to hold it.
                               passportImage != null
                               ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [                                  
                                   IconButton(
-                                    onPressed: pickAndSaveImage,
-                                    icon: const Icon(Icons.file_upload_outlined),
-                                    color: Colors.white,
-                                    iconSize: 50,
-                                  ),
-                                  const SizedBox(width: 25),                
-                                  IconButton(
                                     onPressed: confirmDelete,
                                     icon: const Icon(Icons.delete),
+                                    color: Colors.white,
+                                    iconSize: 50,
+                                  ), 
+                                  const SizedBox(width: 25),                
+                                  IconButton(
+                                    onPressed: _numberPage,
+                                    icon: const Icon(Icons.navigate_next),
                                     color: Colors.white,
                                     iconSize: 50,
                                   ),                                                                    
                                 ],
                               )
-                              : GestureDetector(
-                                onTap: pickAndSaveImage,
-                                child: const Icon(
-                                  Icons.file_upload_outlined,
-                                  color: Colors.white,
-                                  size: 50,
-                                ),
-                              ),
+                              : const SizedBox(height: 25),
                             ],
                           ),
                         ),

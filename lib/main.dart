@@ -26,10 +26,7 @@ class AirportTravelApp extends StatelessWidget {
       // Navigate to the first or Welcome page.
       home: const LoginPage(title: 'login'),
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        // scaffoldBackgroundColor: Colors.blueGrey[50],      
-        // dialogTheme: DialogTheme(backgroundColor: Colors.blueGrey[50], iconColor: Colors.lightBlue),
-        // textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.lightBlue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue)
       ),
     );
   }
