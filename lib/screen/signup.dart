@@ -6,13 +6,17 @@
 */
 
 // Imported dependency packages.
-import 'package:flutter/gestures.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
+// More advanced tapping areas.
+import 'package:flutter/gestures.dart';
+// Dynamic advertisement banners.
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:io';
 // Route to other screens.
-// Sign up.
+// Sign up screen.
 import 'package:airport_travel_app/screen/login.dart';
-// Passport upload.
+// Passport screen.
 import 'package:airport_travel_app/screen/passport.dart';
 
 // This class is the configuration for the state. It holds the values (in this
@@ -52,6 +56,10 @@ class _SignupPageState extends State<SignupPage> {
   String mockEmail = 'colin.bond@test.com';
   String mockPassword = 'test';
 
+  // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
   // Controller for email text field extraction and clearing.
   final TextEditingController _emailController = TextEditingController();
   // Controller for password text field extraction and clearing.
@@ -63,6 +71,33 @@ class _SignupPageState extends State<SignupPage> {
   @override
   void initState() {
     super.initState();
+    MobileAds.instance.initialize();
+    loadAd();
+  }
+
+  // Initialize an ad unit to be displayed in ad widgets.
+  void loadAd() async {
+    // Only initialize ads on supported platforms.
+    if (Platform.isAndroid || Platform.isIOS) {
+      // Use different ad unit IDs depending on Android or otherwise (IoS); both are not real for testing purposes.
+      _bannerAd = BannerAd(
+        adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-3940256099942544/6300978111'
+          : 'ca-app-pub-3940256099942544/2435281174',
+        size: AdSize.banner,
+        request: const AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (Ad ad) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (Ad ad, LoadAdError error) {
+            ad.dispose();
+          },
+        ),
+      )..load();
+    }
   }
 
   void _signup (String email, String password) {
@@ -70,7 +105,6 @@ class _SignupPageState extends State<SignupPage> {
       if (emailNumberRegExp.hasMatch(email)) {
         if (password != '') {
           if (!(email == mockEmail)) {
-            _spawnErrorMessage('Success!');
             _passportPage();
           }
           else {
@@ -148,188 +182,181 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void _passportPage() {
-    // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => PassportPage(title: 'passport'),
-      //   )
-      // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PassportPage(title: 'passport'),
+      )
+    );
   }
 
-  // Visual appearance of the app.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
-
-              // Logo area.
-              ClipRRect(
-                borderRadius: BorderRadius.circular(100.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/logo.png'),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              // Welcome heading.
-              const Text(
-                'Sign up to Airport Travel App',
-                style: TextStyle(
-                  color: Colors.lightBlue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 27,
-                ),
-              ),
-
-              const SizedBox(height: 50),
-
-              // Email.
-              // Email label.
-              const SizedBox(
-                width: 280,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Email',
-                      style: TextStyle(
-                        color: Colors.lightBlue,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 5),
-              // Email input.
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _emailController,
-                  style: const TextStyle(color: Colors.blueGrey, fontSize: 15, fontWeight: FontWeight.normal),
-                  cursorColor: Colors.blueGrey[200],
-                  decoration: InputDecoration(
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueGrey),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.lightBlue),
-                    ),                    
-                    hintText: 'example@example.example',
-                    hintStyle: TextStyle(
-                      color: Colors.blueGrey[200],
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              // Password.
-              // Password label.
-              const SizedBox(
-                width: 280,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Password',
-                      style: TextStyle(
-                        color: Colors.lightBlue,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 5), 
-              // Password input.
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 280,
-                    child: TextField(
-                      controller: _passwordController,
-                      obscureText: !passwordVisible,
-                      style: const TextStyle(color: Colors.blueGrey, fontSize: 15),
-                      cursorColor: Colors.blueGrey[200],
-                      decoration: InputDecoration(
-                        enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueGrey),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlue),
-                        ),
-                        suffix: GestureDetector(
-                          onTap: _showOrHidePassword,
-                          child: Text(
-                            passwordVisibleString,
-                            style: const TextStyle(color: Colors.lightBlue, fontSize: 15),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 75),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(100.0),
+                        child: Container(
+                          height: 125,
+                          width: 125,
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage('assets/images/logo.png'),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 25),
+                      const SizedBox(height: 15),
+                      const Text(
+                        'Airport Travel App',
+                        style: TextStyle(
+                          color: Colors.lightBlue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 35),
 
-              // Sign up button.
-              TextButton(
-                onPressed: () {
-                  _signup(_emailController.text, _passwordController.text);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.lightBlue,
-                  fixedSize: const Size(150, 40),
-                ),
-                child: const Text(
-                  'Sign up',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                      // Email input.
+                      const SizedBox(
+                        width: 280,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Email',
+                            style: TextStyle(color: Colors.lightBlue, fontSize: 15),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      SizedBox(
+                        width: 280,
+                        child: TextField(
+                          controller: _emailController,
+                          style: const TextStyle(color: Colors.blueGrey, fontSize: 15),
+                          cursorColor: Colors.blueGrey[200],
+                          decoration: InputDecoration(
+                            hintText: 'example@example.example',
+                            hintStyle: TextStyle(
+                              color: Colors.blueGrey[200], fontSize: 15, fontWeight: FontWeight.normal
+                            ),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blueGrey),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Password input.
+                      const SizedBox(
+                        width: 280,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Password',
+                            style: TextStyle(color: Colors.lightBlue, fontSize: 15),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      SizedBox(
+                        width: 280,
+                        child: TextField(
+                          controller: _passwordController,
+                          obscureText: !passwordVisible,
+                          style: const TextStyle(color: Colors.blueGrey, fontSize: 15),
+                          cursorColor: Colors.blueGrey[200],
+                          decoration: InputDecoration(
+                            suffix: GestureDetector(
+                              onTap: _showOrHidePassword,
+                              child: Text(
+                                passwordVisibleString,
+                                style: const TextStyle(color: Colors.lightBlue, fontSize: 15),
+                              ),
+                            ),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blueGrey),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+
+                      // Login button.
+                      TextButton(
+                        onPressed: () {
+                          _signup(_emailController.text, _passwordController.text);
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.lightBlue,
+                          fixedSize: const Size(150, 40),
+                        ),
+                        child: const Text(
+                          'Sign up',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Sign up link.
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            const TextSpan(
+                              text: 'Don\'t have an account? ',
+                              style: TextStyle(color: Colors.blueGrey),
+                            ),
+                            TextSpan(
+                              text: 'Log in',
+                              style: const TextStyle(color: Colors.lightBlue),
+                              recognizer: TapGestureRecognizer()..onTap = _loginPage,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              // Sign up redirect link.
-              
-              RichText(
-                text: TextSpan(
-                  children: [
-                    const TextSpan(
-                      text: 'Already have an account? ',
-                      style: TextStyle(color: Colors.blueGrey),
-                    ),
-                    TextSpan(
-                      text: 'Log in',
-                      style: const TextStyle(color: Colors.lightBlue),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () { _loginPage();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(flex: 3),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+
+      // This pins the ad to the bottom of the screen.
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: _isAdLoaded == false
+            ? const SizedBox(height: 50)
+            : SizedBox(
+                height: _bannerAd!.size.height.toDouble(),
+                width: _bannerAd!.size.width.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
       ),
     );
   }

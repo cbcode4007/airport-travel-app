@@ -18,7 +18,7 @@ import 'dart:async';
 // Platform detection.
 import 'dart:io';
 // Route to the next screen.
-import 'package:airport_travel_app/screen/detail.dart';
+import 'package:airport_travel_app/screen/number.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
 // Open Sans Font.
@@ -51,10 +51,10 @@ class PassportPage extends StatefulWidget {
 // This class controls all of the logic for the state of this widget.
 class _PassportPageState extends State<PassportPage> {
   // Declare and initialize information displays.
-  // The timer display.
-  String departTimer = '';
-  // The written priority status.
-  String priority = '';
+  // Strings for the passport status message to change depending on if one was uploaded or not.
+  String passportMessage = '';
+  String passportMessageNoUpload = 'Please upload your passport to continue.';
+  String passportMessageYesUpload = 'Tap on your passport to replace it.';
 
   // Declare the timer for constant updating of the program.
   late Timer _clockTimer;
@@ -234,7 +234,7 @@ class _PassportPageState extends State<PassportPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                departTimer,
+                                'Welcome!',
                                 style: GoogleFonts.openSans(
                                   color: Colors.white,
                                   fontSize: 50,
@@ -243,7 +243,7 @@ class _PassportPageState extends State<PassportPage> {
                                 textAlign: TextAlign.center,
                               ),
                               Text(
-                                priority,
+                                passportMessage,
                                 style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
@@ -266,7 +266,7 @@ class _PassportPageState extends State<PassportPage> {
                                       color: Colors.white,
                                       child: SizedBox(
                                         height: 385,
-                                        width: 275,
+                                        width: 275,                                        
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
