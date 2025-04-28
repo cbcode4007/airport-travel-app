@@ -68,6 +68,7 @@ class _TicketPageState extends State<TicketPage> {
   @override
   void initState() {
     super.initState();
+    loadTicketImage();
     MobileAds.instance.initialize();
     loadAd();
   }
@@ -99,7 +100,7 @@ class _TicketPageState extends State<TicketPage> {
 
   // Preload the ticket image from the system if it was already given one at some point and there was no deletion.
   // Change the caption depending on this as well.
-  Future<void> loadticketImage() async {
+  Future<void> loadTicketImage() async {
     // Check persistent disk store for a specific path, which the ticket upload is set to follow.
     final prefs = await SharedPreferences.getInstance();
     final path = prefs.getString('ticket_image_path');
@@ -253,13 +254,20 @@ class _TicketPageState extends State<TicketPage> {
                           children: [
                             // Back button to log out of account and be able to log in again.
                             IconButton(
-                              onPressed: confirmLogout,
-                              icon: const Icon(Icons.logout),
+                              onPressed: _numberPage,
+                              icon: const Icon(Icons.arrow_back),
                               color: Colors.white,
                               iconSize: 50,
                             ),
                           ],
                         ),
+                        const SizedBox(height: 50),
+                        const Icon(
+                            Icons.airplane_ticket_outlined,
+                            color: Colors.white,
+                            size: 75,
+                        ),
+                        const SizedBox(height: 15),                        
                         // Timer heading & priority info.
                         Center(
                           child: Column(
@@ -275,7 +283,7 @@ class _TicketPageState extends State<TicketPage> {
                                 'Use your Ticket',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 30,
+                                  fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 textAlign: TextAlign.center,
@@ -298,7 +306,7 @@ class _TicketPageState extends State<TicketPage> {
                                       Image.file(
                                         ticketImage!,
                                         width: 275,
-                                        height: 385,
+                                        height: 128,
                                         fit: BoxFit.cover,
                                       ),
                                     ],
@@ -308,7 +316,7 @@ class _TicketPageState extends State<TicketPage> {
                                       DottedBorder(
                                         color: Colors.white,
                                         child: const SizedBox(
-                                          height: 385,
+                                          height: 128,
                                           width: 275,                                        
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
@@ -340,7 +348,7 @@ class _TicketPageState extends State<TicketPage> {
                                   const SizedBox(width: 25),                
                                   IconButton(
                                     onPressed: _numberPage,
-                                    icon: const Icon(Icons.navigate_next),
+                                    icon: const Icon(Icons.arrow_forward),
                                     color: Colors.white,
                                     iconSize: 50,
                                   ),                                                                    

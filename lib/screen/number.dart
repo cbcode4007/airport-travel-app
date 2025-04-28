@@ -10,6 +10,9 @@
 // Imported dependency packages.
 // Encode and decode JSON for processing.
 import 'dart:convert';
+import 'dart:io';
+// Route to the previous screen.
+import 'package:airport_travel_app/screen/passport.dart';
 // Route to the next screen.
 import 'package:airport_travel_app/screen/ticket.dart';
 // Translate raw JSON into Flight objects that can be further processed.
@@ -18,6 +21,8 @@ import 'package:airport_travel_app/model/flight.dart';
 import 'package:flutter/material.dart';
 // API calls, retrieving crucial information about a specified flight.
 import 'package:http/http.dart' as http;
+// Dynamic advertisement banners.
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -39,10 +44,41 @@ class _NumberPageState extends State<NumberPage> {
   // Regular expression to check correct format against user input flight IATA.
   final flightNumberRegExp = RegExp(r'^[a-zA-Z]{2,3}\d{1,4}$');
 
+  // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
   // Load the page.
   @override
   void initState() {
     super.initState();
+    MobileAds.instance.initialize();
+    loadAd();
+  }
+
+  // Initialize an ad unit to be displayed in ad widgets.
+  void loadAd() async {
+    // Only initialize ads on supported platforms.
+    if (Platform.isAndroid || Platform.isIOS) {
+      // Use different ad unit IDs depending on Android or otherwise (IoS); both are not real for testing purposes.
+      _bannerAd = BannerAd(
+        adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-3940256099942544/6300978111'
+          : 'ca-app-pub-3940256099942544/2435281174',
+        size: AdSize.banner,
+        request: const AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (Ad ad) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (Ad ad, LoadAdError error) {
+            ad.dispose();
+          },
+        ),
+      )..load();
+    }
   }
 
   // Calls the AviationStack API and returns a Flight object from JSON that matches the key value (IATA) given.
@@ -175,108 +211,151 @@ class _NumberPageState extends State<NumberPage> {
     );
   }
 
+  void _passportPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PassportPage(title: 'passport'),
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Column(
+              children: [
+                // Top content (scrollable if needed).
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Top icons.
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Back button to log out of account and be able to log in again.
+                            IconButton(
+                              onPressed: _passportPage,
+                              icon: const Icon(Icons.arrow_back),
+                              color: Colors.white,
+                              iconSize: 50,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 75),
+                        const Icon(
+                            Icons.flight,
+                            color: Colors.white,
+                            size: 75,
+                        ),
+                         
+                        // Timer heading & prioritconst SizedBox(height: 15),y info.
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text (
+                                'Step 2 of 3',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                )
+                              ),                                                          
+                              const Text(
+                                'Catch your Flight',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 25),
+                              const Text (
+                                'Please enter your flight number.',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                )
+                              ),
+                              const SizedBox(height: 15),
+                              
+                              Center(
+                              child: SizedBox(
+                                width: 280,
+                                child: TextField(
+                                  controller: _controller,
+                                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                                  cursorColor: Colors.white,
+                                  decoration: const InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.white70),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.white),
+                                    ),
+                                    hintText: 'AAA####',
+                                    hintStyle: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
 
-              // Logo
-              const Icon(
-                Icons.flight,
-                color: Colors.white,
-                size: 75,
-              ),
-              const SizedBox(height: 15),
+                              const SizedBox(height:20),
 
-              const Text(
-                'Step 2 of 3',
-                style: TextStyle(color: Colors.white, fontSize: 15),
-                textAlign: TextAlign.center,
-              ),
-
-              const Text(
-                'Catch your Flight',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              const Text(
-                'Please enter your\nflight number below.',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 24),
-
-              // Input box
-              Center(
-                child: SizedBox(
-                  width: 280,
-                  child: TextField(
-                    controller: _controller,
-                    style: const TextStyle(color: Colors.white, fontSize: 15),
-                    cursorColor: Colors.white,
-                    decoration: const InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white70),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      hintText: 'AAA####',
-                      hintStyle: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 15,
-                      ),
+                              // Submit button
+                              Center(
+                                child: TextButton(
+                                  onPressed: () {
+                                    _validateFlightInput(_controller.text);
+                                    _controller.clear();
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    fixedSize: const Size(150, 40),
+                                  ),
+                                  child: const Text(
+                                    'Submit',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.lightBlue,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 25),
-
-              // Submit button
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    _validateFlightInput(_controller.text);
-                    _controller.clear();
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    fixedSize: const Size(150, 40),
-                  ),
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.lightBlue,
+                // Ad pinned to bottom.
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _isAdLoaded == false
+                  ? const SizedBox(
+                      width: 320,
+                      height: 50,
+                    )
+                  : SizedBox(
+                      width: _bannerAd!.size.width.toDouble(),
+                      height: _bannerAd!.size.height.toDouble(),
+                      child: AdWidget(ad: _bannerAd!),
                     ),
-                  ),
                 ),
-              ),
-
-              const Spacer(flex: 3),
-            ],
-          ),
+              ],
+            );
+          },
         ),
       ),
     );

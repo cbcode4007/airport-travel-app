@@ -64,6 +64,7 @@ class _PassportPageState extends State<PassportPage> {
   @override
   void initState() {
     super.initState();
+    loadPassportImage();
     MobileAds.instance.initialize();
     loadAd();
   }
@@ -336,7 +337,7 @@ class _PassportPageState extends State<PassportPage> {
                                   const SizedBox(width: 25),                
                                   IconButton(
                                     onPressed: _numberPage,
-                                    icon: const Icon(Icons.navigate_next),
+                                    icon: const Icon(Icons.arrow_forward),
                                     color: Colors.white,
                                     iconSize: 50,
                                   ),                                                                    
