@@ -222,7 +222,7 @@ class _PassportPageState extends State<PassportPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const NumberPage(title: 'number'),
+        builder: (context) => NumberPage(title: 'number', passport: passportImage!),
       )
     );
   }

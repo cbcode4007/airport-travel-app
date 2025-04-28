@@ -47,6 +47,7 @@ dependencies:
   timezone: ^0.10.0
   google_mobile_ads: ^3.0.0
   instant: ^0.5.1
+  photo_view: ^0.15.0
 
 
 dev_dependencies:

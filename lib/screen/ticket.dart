@@ -17,8 +17,10 @@
 import 'dart:async';
 // Platform detection.
 import 'dart:io';
-// Route to the next screen.
+// Route to the previous screen.
 import 'package:airport_travel_app/screen/number.dart';
+// Route to the next screen.
+import 'package:airport_travel_app/screen/detail.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
 // Dynamic advertisement banners.
@@ -40,10 +42,12 @@ class TicketPage extends StatefulWidget {
   const TicketPage({
     super.key,
     required this.title,
+    required this.passport,
     required this.flight
   });
 
   final String title;
+  final File passport;
   final Flight flight;
 
   @override
@@ -226,7 +230,16 @@ class _TicketPageState extends State<TicketPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const NumberPage(title: 'number'),
+        builder: (context) => NumberPage(title: 'number', passport: widget.passport),
+      )
+    );
+  }
+
+  void _detailPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailPage(title: 'detail', passport: widget.passport, flight: widget.flight, ticket: ticketImage!),
       )
     );
   }
@@ -261,7 +274,7 @@ class _TicketPageState extends State<TicketPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 50),
+                        const SizedBox(height: 35),
                         const Icon(
                             Icons.airplane_ticket_outlined,
                             color: Colors.white,
@@ -287,7 +300,7 @@ class _TicketPageState extends State<TicketPage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                                 textAlign: TextAlign.center,
-                              ),
+                              ),                              
                               const SizedBox(height: 5),                              
                               SizedBox(
                                 width: 280,
@@ -347,7 +360,7 @@ class _TicketPageState extends State<TicketPage> {
                                   ), 
                                   const SizedBox(width: 25),                
                                   IconButton(
-                                    onPressed: _numberPage,
+                                    onPressed: _detailPage,
                                     icon: const Icon(Icons.arrow_forward),
                                     color: Colors.white,
                                     iconSize: 50,

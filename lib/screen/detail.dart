@@ -18,7 +18,7 @@ import 'dart:async';
 // Platform detection.
 import 'dart:io';
 // Route to the next screen.
-import 'package:airport_travel_app/screen/passport.dart';
+import 'package:airport_travel_app/screen/ticket.dart';
 // Flight data.
 import 'package:airport_travel_app/model/flight.dart';
 // Material app design, or in other words Google standards for UI.
@@ -33,6 +33,8 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:instant/instant.dart';
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+// Passport and ticket displays.
+import 'package:photo_view/photo_view.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title and flight) provided by the parent (in this case the App widget) and
@@ -42,11 +44,15 @@ class DetailPage extends StatefulWidget {
   const DetailPage({
     super.key,
     required this.title,
+    required this.passport,
     required this.flight,
+    required this.ticket
   });
 
   final String title;
+  final File passport;
   final Flight flight;
+  final File ticket;
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -189,6 +195,60 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
+  void expandPassport() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        pageBuilder: (BuildContext context, _, __) {
+          return Scaffold(
+            backgroundColor: Colors.black.withOpacity(0.5),
+            body: Center(
+              child: Hero(
+                tag: "zoom",
+                child: PhotoView(
+                  imageProvider: FileImage(widget.passport),
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.transparent,
+                  ),
+                  minScale: PhotoViewComputedScale.contained * 0.8,
+                  maxScale: PhotoViewComputedScale.covered * 1.8,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void expandTicket() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        pageBuilder: (BuildContext context, _, __) {
+          return Scaffold(
+            backgroundColor: Colors.black.withOpacity(0.5),
+            body: Center(
+              child: Hero(
+                tag: "zoom",
+                child: PhotoView(
+                  imageProvider: FileImage(widget.ticket),
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.transparent,
+                  ),
+                  minScale: PhotoViewComputedScale.contained * 0.8,
+                  maxScale: PhotoViewComputedScale.covered * 1.8,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _clockTimer.cancel();
@@ -196,18 +256,18 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   // Navigate back to the first or Welcome page.
-  void welcomePage() {
-    Navigator.pushNamed(context, '/');
-  }
+  // void _welcomePage() {
+  //   Navigator.pushNamed(context, '/');
+  // }
 
   // Navigate to the third or Passport page.
-  void passportPage() {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => PassportPage(title: 'passport', flight: widget.flight,),
-    //   )
-    // );
+  void _ticketPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TicketPage(title: 'ticket', passport: widget.passport, flight: widget.flight,),
+      )
+    );
   }
 
   // Visual appearance of the app.
@@ -233,14 +293,14 @@ class _DetailPageState extends State<DetailPage> {
                           children: [
                             // Back button to enter another flight IATA.
                             IconButton(
-                              onPressed: welcomePage,
+                              onPressed: _ticketPage,
                               icon: const Icon(Icons.arrow_back),
                               color: Colors.white,
                               iconSize: 50,
                             ),
                             // Passport button to add a passport image to view in the app.
                             IconButton(
-                              onPressed: passportPage,
+                              onPressed: expandPassport,
                               icon: const Icon(Icons.badge),
                               color: Colors.white,
                               iconSize: 50,
@@ -266,7 +326,20 @@ class _DetailPageState extends State<DetailPage> {
                                 style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 100),
+                              const SizedBox(height: 25),
+                              GestureDetector(
+                                onTap: expandTicket,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.file(
+                                    widget.ticket,
+                                    width: 275,
+                                    height: 128,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 25),
                               Text(
                                 'Flight Details for ${widget.flight.flightIata}',
                                 style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
@@ -277,11 +350,10 @@ class _DetailPageState extends State<DetailPage> {
                                 style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 25),
+                              const SizedBox(height: 5),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 5),
                         // Flight details row.
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +364,6 @@ class _DetailPageState extends State<DetailPage> {
                               child: Column(
                                 children: [
                                   const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
-                                  const SizedBox(height: 8),
                                   Text(
                                     '$departTime $departCode',
                                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
@@ -323,7 +394,6 @@ class _DetailPageState extends State<DetailPage> {
                               child: Column(
                                 children: [
                                   const Icon(Icons.flight_land, color: Colors.white, size: 50),
-                                  const SizedBox(height: 8),
                                   Text(
                                     '$arriveTime $arriveCode',
                                     style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
