@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "299611344278",
+    "project_id": "airport-travel-app",
+    "storage_bucket": "airport-travel-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:299611344278:android:e28d33f75ba33d6b4e61b7",
+        "android_client_info": {
+          "package_name": "com.example.airport_travel_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxoFPBGfaDjiVOD3OUbl453N941-2pVmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

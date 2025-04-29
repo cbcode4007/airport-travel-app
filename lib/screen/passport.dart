@@ -37,10 +37,8 @@ import 'package:dotted_border/dotted_border.dart';
 class PassportPage extends StatefulWidget {
   const PassportPage({
     super.key,
-    required this.title,
   });
 
-  final String title;
 
   @override
   State<PassportPage> createState() => _PassportPageState();
@@ -222,7 +220,7 @@ class _PassportPageState extends State<PassportPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => NumberPage(title: 'number', passport: passportImage!),
+        builder: (context) => NumberPage(passport: passportImage!),
       )
     );
   }

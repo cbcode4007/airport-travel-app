@@ -29,8 +29,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 // used by the build method of the State. Fields in a Widget subclass are
 // always marked "final".
 class NumberPage extends StatefulWidget {
-  const NumberPage({super.key, required this.title, required this.passport});
-  final String title;
+  const NumberPage({super.key, required this.passport});
   final File passport;
   @override
   State<NumberPage> createState() => _NumberPageState();
@@ -159,7 +158,7 @@ class _NumberPageState extends State<NumberPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TicketPage(title: 'ticket', passport: widget.passport, flight: matchedFlight,),
+                builder: (context) => TicketPage(passport: widget.passport, flight: matchedFlight,),
               )
             );
           }
@@ -216,7 +215,7 @@ class _NumberPageState extends State<NumberPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const PassportPage(title: 'passport'),
+        builder: (context) => const PassportPage(),
       )
     );
   }

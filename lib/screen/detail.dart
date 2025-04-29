@@ -43,13 +43,11 @@ import 'package:photo_view/photo_view.dart';
 class DetailPage extends StatefulWidget {
   const DetailPage({
     super.key,
-    required this.title,
     required this.passport,
     required this.flight,
     required this.ticket
   });
 
-  final String title;
   final File passport;
   final Flight flight;
   final File ticket;
@@ -265,7 +263,7 @@ class _DetailPageState extends State<DetailPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TicketPage(title: 'ticket', passport: widget.passport, flight: widget.flight,),
+        builder: (context) => TicketPage(passport: widget.passport, flight: widget.flight,),
       )
     );
   }

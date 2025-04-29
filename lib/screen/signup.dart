@@ -22,8 +22,7 @@ import 'package:airport_travel_app/screen/passport.dart';
 // used by the build method of the State. Fields in a Widget subclass are
 // always marked "final".
 class SignupPage extends StatefulWidget {
-  const SignupPage({super.key, required this.title});
-  final String title;
+  const SignupPage({super.key,});
   @override
   State<SignupPage> createState() => _SignupPageState();
 }
@@ -177,7 +176,7 @@ class _SignupPageState extends State<SignupPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const PassportPage(title: 'passport'),
+        builder: (context) => const PassportPage(),
       )
     );
   }

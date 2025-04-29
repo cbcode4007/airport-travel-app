@@ -41,12 +41,10 @@ import 'package:airport_travel_app/model/flight.dart';
 class TicketPage extends StatefulWidget {
   const TicketPage({
     super.key,
-    required this.title,
     required this.passport,
     required this.flight
   });
 
-  final String title;
   final File passport;
   final Flight flight;
 
@@ -230,7 +228,7 @@ class _TicketPageState extends State<TicketPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => NumberPage(title: 'number', passport: widget.passport),
+        builder: (context) => NumberPage(passport: widget.passport),
       )
     );
   }
@@ -239,7 +237,7 @@ class _TicketPageState extends State<TicketPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetailPage(title: 'detail', passport: widget.passport, flight: widget.flight, ticket: ticketImage!),
+        builder: (context) => DetailPage(passport: widget.passport, flight: widget.flight, ticket: ticketImage!),
       )
     );
   }
