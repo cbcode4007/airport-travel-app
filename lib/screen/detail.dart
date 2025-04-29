@@ -255,12 +255,12 @@ class _DetailPageState extends State<DetailPage> {
 
   // Navigate back to the first or Welcome page.
   // void _welcomePage() {
-  //   Navigator.pushNamed(context, '/');
+  //   Navigator.pushReplacementNamed(context, '/');
   // }
 
   // Navigate to the third or Passport page.
   void _ticketPage() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => TicketPage(passport: widget.passport, flight: widget.flight,),

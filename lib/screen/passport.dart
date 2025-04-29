@@ -19,6 +19,7 @@ import 'dart:async';
 import 'dart:io';
 // Route to the next screen.
 import 'package:airport_travel_app/screen/number.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
 // Dynamic advertisement banners.
@@ -29,6 +30,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title and flight) provided by the parent (in this case the App widget) and
@@ -196,7 +198,8 @@ class _PassportPageState extends State<PassportPage> {
             TextButton(
               child: const Text('Yes'),
               onPressed: () {
-                _loginPage();
+                Navigator.of(context).pop();
+                _logOut();
               },
             ),
           ],
@@ -205,19 +208,28 @@ class _PassportPageState extends State<PassportPage> {
     );
   }
 
+  // Navigate back to the first or Welcome page.
+  void _logOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+
+      if (!mounted) return;
+
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      // print('Sign out error: $e');
+    }
+  }
+
+
   @override
   void dispose() {
     super.dispose();
   }
 
-  // Navigate back to the first or Welcome page.
-  void _loginPage() {
-    Navigator.pushNamed(context, '/');
-  }
-
   // Navigate to the third or Flight Number page.
   void _numberPage() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => NumberPage(passport: passportImage!),
@@ -247,12 +259,21 @@ class _PassportPageState extends State<PassportPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // Back button to log out of account and be able to log in again.
+                            // IconButton(
+                            //   onPressed: confirmLogout,
+                            //   icon: const Icon(Icons.logout),
+                            //   color: Colors.white,
+                            //   iconSize: 50,
+                            // ),
+
                             IconButton(
-                              onPressed: confirmLogout,
                               icon: const Icon(Icons.logout),
-                              color: Colors.white,
                               iconSize: 50,
-                            ),
+                              color: Colors.white,
+                              tooltip: 'Sign Out',
+                              onPressed: confirmLogout
+                            )
+
                           ],
                         ),
                         // Timer heading & priority info.

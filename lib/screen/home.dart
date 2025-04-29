@@ -51,7 +51,7 @@ class HomeScreen extends StatelessWidget {
             // const SignOutButton(),
 
             IconButton(
-              icon: Icon(Icons.logout),
+              icon: const Icon(Icons.logout),
               iconSize: 50,
               tooltip: 'Sign Out',
               onPressed: () async {

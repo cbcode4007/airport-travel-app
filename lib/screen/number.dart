@@ -155,7 +155,7 @@ class _NumberPageState extends State<NumberPage> {
           if (!mounted) return;
           // Take a returned Flight whose IATA matches the entry and navigate to next page with it as a parameter.
           if (matchedFlight != null) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => TicketPage(passport: widget.passport, flight: matchedFlight,),
@@ -212,7 +212,7 @@ class _NumberPageState extends State<NumberPage> {
   }
 
   void _passportPage() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => const PassportPage(),

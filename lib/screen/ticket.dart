@@ -220,12 +220,12 @@ class _TicketPageState extends State<TicketPage> {
 
   // Navigate back to the first or Welcome page.
   void _loginPage() {
-    Navigator.pushNamed(context, '/');
+    Navigator.pushReplacementNamed(context, '/');
   }
 
   // Navigate to the third or Flight Number page.
   void _numberPage() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => NumberPage(passport: widget.passport),
@@ -234,7 +234,7 @@ class _TicketPageState extends State<TicketPage> {
   }
 
   void _detailPage() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => DetailPage(passport: widget.passport, flight: widget.flight, ticket: ticketImage!),

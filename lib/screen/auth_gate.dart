@@ -3,7 +3,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 // import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 
-import 'home.dart';
+import 'passport.dart';
 // import '../main.dart';
 
 class AuthGate extends StatelessWidget {
@@ -26,7 +26,7 @@ class AuthGate extends StatelessWidget {
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: Image.asset('assets/images/logo.png'),
-                ),
+                ),                
               );
             },
             subtitleBuilder: (context, action) {
@@ -57,7 +57,7 @@ class AuthGate extends StatelessWidget {
             },
           );
         }
-        return const HomeScreen();
+        return const PassportPage();
       },
     );
   }

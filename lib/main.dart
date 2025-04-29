@@ -9,6 +9,8 @@
 // Imported dependency packages.
 // Material app design, or in other words Google standards for UI.
 import 'package:airport_travel_app/firebase_options.dart';
+import 'package:airport_travel_app/screen/passport.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 // Timezone logic for correct displays.
@@ -37,12 +39,30 @@ class AirportTravelApp extends StatelessWidget {
   // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
+    // return MaterialApp(
+    //   // Navigate to the first or Welcome page.
+    //   // home: const LoginPage(),
+    //   home: const AuthGate(),
+    //   theme: ThemeData(
+    //     colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue)
+    //   ),
+    // );
     return MaterialApp(
-      // Navigate to the first or Welcome page.
-      // home: const LoginPage(),
-      home: const AuthGate(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue)
+      ),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasData) {
+            return PassportPage(); // or your home screen
+          } else {
+            return AuthGate(); // or your sign-in screen
+          }
+        },
       ),
     );
   }
