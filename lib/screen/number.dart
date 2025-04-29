@@ -82,57 +82,57 @@ class _NumberPageState extends State<NumberPage> {
   }
 
   // Calls the AviationStack API and returns a Flight object from JSON that matches the key value (IATA) given.
-  // Future<Flight?> _callFlightAPI(String iata) async {
-  //   // API Credentials.
-  //   const key = 'a5cba517fdce175c2efdef4c6c2459e6';
-  //   // Link to the request.
-  //   String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
-  //   // Pass a unique resource identifier object.
-  //   final uri = Uri.parse(url);
-  //   final response = await http.get(uri);
-  //   // The request was successfully read and responded to.
-  //   if (response.statusCode == 200) {
-  //     final body = response.body;
-  //     final json = jsonDecode(body) as Map<String, dynamic>;
-  //     final data = json['data'] as List<dynamic>;
-  //     // What was returned is not an empty string, and should therefore be something in the API.
-  //     if (data.isNotEmpty) {
-  //       // Return only focused, important fields for this use case, incorporating them into the Flight model.
-  //       return Flight.fromJson(data.first);
-  //     } else {
-  //       return null;
-  //     }
-  //   } else {
-  //     throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
-  //   }
-  // }
+  Future<Flight?> _callFlightAPI(String iata) async {
+    // API Credentials.
+    const key = 'a5cba517fdce175c2efdef4c6c2459e6';
+    // Link to the request.
+    String url = 'https://api.aviationstack.com/v1/flights?access_key=$key&flight_iata=$iata';
+    // Pass a unique resource identifier object.
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
+    // The request was successfully read and responded to.
+    if (response.statusCode == 200) {
+      final body = response.body;
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final data = json['data'] as List<dynamic>;
+      // What was returned is not an empty string, and should therefore be something in the API.
+      if (data.isNotEmpty) {
+        // Return only focused, important fields for this use case, incorporating them into the Flight model.
+        return Flight.fromJson(data.first);
+      } else {
+        return null;
+      }
+    } else {
+      throw Exception('Failed to fetch flights. Status: ${response.statusCode}');
+    }
+  }
 
   // Return a preset Flight object made out of mock data for testing.
-  Future<Flight?> _callFlightAPI(String iata) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
+  // Future<Flight?> _callFlightAPI(String iata) async {
+  //   // Simulate network delay
+  //   await Future.delayed(const Duration(milliseconds: 500));
 
-    // Mock flight data similar to what the real API returns
-    final mockJson = {
-      "flight": {
-        "iata": "AC8192",
-        "icao": "ACA8192",
-      },
-      "departure": {
-        "iata": "YVR",
-        "airport": "Vancouver International",
-        "estimated": "2025-04-25T13:55:00+00:00",
-        "timezone": "America/Vancouver",
-      },
-      "arrival": {
-        "iata": "YQR",
-        "airport": "Regina",
-        "scheduled": "2025-04-25T13:02:00+00:00",
-        "timezone": "America/Regina",
-      }
-    };
-    return Flight.fromJson(mockJson);
-  }
+  //   // Mock flight data similar to what the real API returns
+  //   final mockJson = {
+  //     "flight": {
+  //       "iata": "AC8192",
+  //       "icao": "ACA8192",
+  //     },
+  //     "departure": {
+  //       "iata": "YVR",
+  //       "airport": "Vancouver International",
+  //       "estimated": "2025-04-25T13:55:00+00:00",
+  //       "timezone": "America/Vancouver",
+  //     },
+  //     "arrival": {
+  //       "iata": "YQR",
+  //       "airport": "Regina",
+  //       "scheduled": "2025-04-25T13:02:00+00:00",
+  //       "timezone": "America/Regina",
+  //     }
+  //   };
+  //   return Flight.fromJson(mockJson);
+  // }
 
   // Validates the flight IATA a user enters.
   // First, it will see if anything was entered at all and relay a unique message for them to do so if not.
