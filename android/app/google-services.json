@@ -12,7 +12,20 @@
           "package_name": "com.example.airport_travel_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "299611344278-94um7kuim9gt4j68f6r982k6fn15cngi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.airport_travel_app",
+            "certificate_hash": "9270dedbfaa9b81aea184f37cfb5f95103c8e0ad"
+          }
+        },
+        {
+          "client_id": "299611344278-kq29k1540bnkr9v5vchnml3ub35d7bcs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBxoFPBGfaDjiVOD3OUbl453N941-2pVmI"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "299611344278-kq29k1540bnkr9v5vchnml3ub35d7bcs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "299611344278-cqtv3i16griuirqi0s3h8blfjlqaltbo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.airportTravelApp"
+              }
+            }
+          ]
         }
       }
     }

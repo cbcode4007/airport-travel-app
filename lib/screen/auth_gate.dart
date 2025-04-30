@@ -1,10 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-// import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 
 import 'passport.dart';
-// import '../main.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -15,10 +14,20 @@ class AuthGate extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
+          
           return SignInScreen(
             providers: [
               EmailAuthProvider(),
-              // GoogleProvider(clientId: clientId),
+              GoogleProvider(clientId: '299611344278-kq29k1540bnkr9v5vchnml3ub35d7bcs.apps.googleusercontent.com'),
+            ],
+            actions: [
+              AuthStateChangeAction<AuthFailed>((context, state) {
+                final error = state.exception;
+                print("Authentication failed: $error");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Authentication failed: $error')),
+                );
+              }),
             ],
             headerBuilder: (context, constraints, shrinkOffset) {
               return Padding(
@@ -41,7 +50,7 @@ class AuthGate extends StatelessWidget {
               return const Padding(
                 padding: EdgeInsets.only(top: 16),
                 child: Text(
-                  'By signing in, you agree to our terms and conditions.',
+                  'By using our system, you agree to our terms and conditions.',
                   style: TextStyle(color: Colors.grey),
                 ),
               );

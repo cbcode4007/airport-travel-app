@@ -16,11 +16,10 @@ import 'package:flutter/material.dart';
 // Timezone logic for correct displays.
 import 'package:timezone/data/latest.dart' as tz;
 // Route to the next screen.
-// import 'package:airport_travel_app/screen/login.dart';
 import 'package:airport_travel_app/screen/auth_gate.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-// const clientId = '299611344278-kq29k1540bnkr9v5vchnml3ub35d7bcs.apps.googleusercontent.com';
+const clientId = '299611344278-kq29k1540bnkr9v5vchnml3ub35d7bcs.apps.googleusercontent.com';
 
 void main () async {
   WidgetsFlutterBinding.ensureInitialized();
