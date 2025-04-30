@@ -31,6 +31,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
+import 'auth_gate.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title and flight) provided by the parent (in this case the App widget) and
@@ -211,13 +212,25 @@ class _PassportPageState extends State<PassportPage> {
   // Navigate back to the first or Welcome page.
   void _logOut() async {
     try {
+      print('Signing out...');
       await FirebaseAuth.instance.signOut();
+      print('Sign out successful.');
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+      else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AuthGate(),
+          )
+        );
+      }
 
       Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
-      // print('Sign out error: $e');
+      print('Sign out error: $e');
     }
   }
 

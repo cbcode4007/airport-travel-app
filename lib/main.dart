@@ -58,9 +58,9 @@ class AirportTravelApp extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasData) {
-            return PassportPage(); // or your home screen
+            return const PassportPage(); // or your home screen
           } else {
-            return AuthGate(); // or your sign-in screen
+            return const AuthGate(); // or your sign-in screen
           }
         },
       ),
