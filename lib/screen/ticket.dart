@@ -2,37 +2,44 @@
   Author:      Colin Bond
   File:        ticket.dart
   
-  Description: This file provides a hub and convenient display for users, presenting them with
-               a timer until their flight begins departing, time in their device's local area,
-               an explicit priority status informed by the background color which is checked
-               and switched accordingly every second, and finally a ticket upload field 
-               for display with icons that allow for replacement or deletion.
-               Above this, there are two buttons, one backing out to the previous screen so
-               that a new flight number can be entered and another toggling a page where the user can
-               view their flight details instead, making it easily visible alongside their priority info.
+  Description: This file provides users an opportunity to upload their ticket for later display. It features
+               a tappable area near the center which will remain so even after a ticket is uploaded and
+               displayed to promote swift updating of it when necessary. Additionally, icons to delete
+               the ticket and also navigate to the next screen will only show up if there is a file
+               path registered within the app.
 */
 
 // Imported dependency packages.
+
+// Dart language native libraries.
 // Future class for asynchronous updating.
 import 'dart:async';
-// Platform detection.
+// File work.
 import 'dart:io';
-// Route to the previous screen.
-import 'package:airport_travel_app/screen/number.dart';
-// Route to the next screen.
-import 'package:airport_travel_app/screen/detail.dart';
+
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
-// Dynamic advertisement banners.
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-// Image uploading and display across page visits.
+
+// Image related packages.
+// Select images from gallery.
 import 'package:image_picker/image_picker.dart';
+// File pathing logic to persist selected image across different page visits.
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
+
+// Dynamic advertisement banners.
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 // Flight model for necessary data about the flight to carry to the details screen.
 import 'package:airport_travel_app/model/flight.dart';
+
+// Routes to the other screens.
+// Route to the previous screen to re-enter a flight number, redo passport or find the button to log out.
+import 'package:airport_travel_app/screen/number.dart';
+// Route to the next screen to view flight and priority status.
+import 'package:airport_travel_app/screen/detail.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title and flight) provided by the parent (in this case the App widget) and
@@ -66,7 +73,7 @@ class _TicketPageState extends State<TicketPage> {
   // Declare to-be image file for the user ticket.
   File? ticketImage;
 
-  // Load the page including certain external libraries needing initialization (timezones and mobile ads).
+  // Load the page including a previously selected image path if there is one found and an ad instance for the page.
   @override
   void initState() {
     super.initState();
@@ -179,51 +186,12 @@ class _TicketPageState extends State<TicketPage> {
     }
   }
 
-  // Pop up a confirmation for logging out.
-  Future<void> confirmLogout() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Are you sure you want to log out?'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Yes'),
-              onPressed: () {
-                _loginPage();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   void dispose() {
     super.dispose();
   }
 
-  // Navigate back to the first or Welcome page.
-  void _loginPage() {
-    Navigator.pushReplacementNamed(context, '/');
-  }
-
-  // Navigate to the third or Flight Number page.
+  // Navigate to the third or Flight Number entry page.
   void _numberPage() {
     Navigator.pushReplacement(
       context,
@@ -233,6 +201,7 @@ class _TicketPageState extends State<TicketPage> {
     );
   }
 
+  // Navigate past this last step and access the main HUD of the app with all of the information.
   void _detailPage() {
     Navigator.pushReplacement(
       context,
@@ -259,11 +228,11 @@ class _TicketPageState extends State<TicketPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Top icons.
+                        // Top row of icons.
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Back button to log out of account and be able to log in again.
+                            // Back button to return to Flight Number selection.
                             IconButton(
                               onPressed: _numberPage,
                               icon: const Icon(Icons.arrow_back),
@@ -279,11 +248,12 @@ class _TicketPageState extends State<TicketPage> {
                             size: 75,
                         ),
                         const SizedBox(height: 15),                        
-                        // Timer heading & priority info.
+                        // Main layout of the screen. 
                         Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              // Headings conveying step number, a welcoming message, and instructions for this step.
                               const Text (
                                 'Step 3 of 3',
                                 style: TextStyle(
@@ -309,6 +279,7 @@ class _TicketPageState extends State<TicketPage> {
                                 ),
                               ),
                               const SizedBox(height: 20),
+                              // Ticket selection and display area.
                               GestureDetector(
                                 onTap: pickAndSaveImage,
                                 child: ticketImage != null
@@ -345,7 +316,8 @@ class _TicketPageState extends State<TicketPage> {
                                   ),
                               ),
                               const SizedBox(height: 10),
-                              // Upload or view ticket zone, depending on the current state of the variable to hold it.
+                              // Bottom row of icons, with delete ticket and next step.
+                              // There must be a ticket entry for the ability to delete it or move forward.
                               ticketImage != null
                               ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -373,7 +345,7 @@ class _TicketPageState extends State<TicketPage> {
                     ),
                   ),
                 ),
-                // Ad pinned to bottom.
+                // Ad pinned to very bottom.
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _isAdLoaded == false

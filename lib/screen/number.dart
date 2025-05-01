@@ -1,28 +1,37 @@
 /*
   Author:      Colin Bond
-  File:        home.dart
+  File:        number.dart
   
-  Description: This file provides an initial page for the Airport Travel Application, where users will
-               enter a flight number to proceed to its timer and corresponding priority interface, if it exists.
+  Description: This file provides another page for the Airport Travel Application, where users will
+               enter a flight number to proceed to entering a ticket for that flight.
                Contains additional validation to only call the API when absolutely necessary, as uses are limited.
 */
 
 // Imported dependency packages.
+
+// Dart language native libraries.
+// HTTP fetching.
+import 'dart:io';
 // Encode and decode JSON for processing.
 import 'dart:convert';
-import 'dart:io';
-// Route to the previous screen.
-import 'package:airport_travel_app/screen/passport.dart';
-// Route to the next screen.
-import 'package:airport_travel_app/screen/ticket.dart';
-// Translate raw JSON into Flight objects that can be further processed.
-import 'package:airport_travel_app/model/flight.dart';
+
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
+
 // API calls, retrieving crucial information about a specified flight.
 import 'package:http/http.dart' as http;
+
 // Dynamic advertisement banners.
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+// Translate raw JSON into Flight objects that can be further processed.
+import 'package:airport_travel_app/model/flight.dart';
+
+// Routes to the other screens.
+// Route to the previous screen to log out or if the password needs to be updated.
+import 'package:airport_travel_app/screen/passport.dart';
+// Route to the next screen when ticket is prepared.
+import 'package:airport_travel_app/screen/ticket.dart';
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title) provided by the parent (in this case the App widget) and
@@ -42,13 +51,13 @@ class _NumberPageState extends State<NumberPage> {
   // Controller for flight IATA text field extraction and clearing.
   final TextEditingController _controller = TextEditingController();
   // Regular expression to check correct format against user input flight IATA.
-  final flightNumberRegExp = RegExp(r'^[a-zA-Z]{2,3}\d{1,4}$');
+  final flightNumberRegExp = RegExp(r'^[a-zA-Z]{1,3}\d{1,4}$');
 
   // Declare an ad unit to be displayed in ad widgets and bool to ensure it loads successfully before proceeding.
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
 
-  // Load the page.
+  // Load the page and an ad instance for it.
   @override
   void initState() {
     super.initState();
@@ -107,34 +116,6 @@ class _NumberPageState extends State<NumberPage> {
     }
   }
 
-  // !!!
-  // Return a preset Flight object made out of mock data for testing.
-  // Future<Flight?> _callFlightAPI(String iata) async {
-  //   // Simulate network delay
-  //   await Future.delayed(const Duration(milliseconds: 500));
-
-  //   // Mock flight data similar to what the real API returns
-  //   final mockJson = {
-  //     "flight": {
-  //       "iata": "AC8192",
-  //       "icao": "ACA8192",
-  //     },
-  //     "departure": {
-  //       "iata": "YVR",
-  //       "airport": "Vancouver International",
-  //       "estimated": "2025-04-25T13:55:00+00:00",
-  //       "timezone": "America/Vancouver",
-  //     },
-  //     "arrival": {
-  //       "iata": "YQR",
-  //       "airport": "Regina",
-  //       "scheduled": "2025-04-25T13:02:00+00:00",
-  //       "timezone": "America/Regina",
-  //     }
-  //   };
-  //   return Flight.fromJson(mockJson);
-  // }
-
   // Validates the flight IATA a user enters.
   // First, it will see if anything was entered at all and relay a unique message for them to do so if not.
   // Then, it compares what the user entered to the RegEx which represents correct formatting.
@@ -142,13 +123,13 @@ class _NumberPageState extends State<NumberPage> {
   // Finally, once it does find a flight IATA in the API, it will proceed to the next page with that flight's data.
   void _validateFlightInput (String flightNumber) async {
     const String errorMessageEmpty = 'You must enter a flight number to continue!';
-    const String errorMessageFormat = 'The flight number you entered is invalid! Please use two or three letters at the front and one to four numbers behind them.';
+    const String errorMessageFormat = 'The flight number you entered is invalid! Please use an IATA-format flight number.';
     const String errorMessageCall = 'The flight number you entered could not be found! Please check and try again.';
 
     // Was anything entered in the text field?
     if (flightNumber != '') {
       // Does the entry adhere to standard IATA formatting?
-      if ((flightNumber.length >= 3 && flightNumber.length <= 7) && (flightNumberRegExp.hasMatch(flightNumber))) {
+      if ((flightNumberRegExp.hasMatch(flightNumber))) {
         // See if the IATA is in the system after it at least looks like it could be.
         try {
           final matchedFlight = await _callFlightAPI(flightNumber);
@@ -184,7 +165,7 @@ class _NumberPageState extends State<NumberPage> {
     }
   }
 
-  // Creates a visually striking error message tailored to the situation at the bottom of the screen.
+  // Creates a visually striking error message tailored to the situation front and center.
   Future<void> _spawnErrorMessage(String error) async {
     return showDialog<void>(
       context: context,
@@ -212,6 +193,7 @@ class _NumberPageState extends State<NumberPage> {
     );
   }
 
+  // Navigate back to the second or Passport page.
   void _passportPage() {
     Navigator.pushReplacement(
       context,
@@ -237,11 +219,11 @@ class _NumberPageState extends State<NumberPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Top icons.
+                        // Top row of icons.
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Back button to log out of account and be able to log in again.
+                            // Back button to return to Passport setup.
                             IconButton(
                               onPressed: _passportPage,
                               icon: const Icon(Icons.arrow_back),
@@ -256,12 +238,12 @@ class _NumberPageState extends State<NumberPage> {
                             color: Colors.white,
                             size: 75,
                         ),
-                         
-                        // Timer heading & prioritconst SizedBox(height: 15),y info.
-                        Center(
+                        // Main layout of the screen.                        
+                        Center(                          
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,                            
                             children: [
+                              // Headings conveying step number, a welcoming message, and instructions for this step.
                               const Text (
                                 'Step 2 of 3',
                                 style: TextStyle(
@@ -285,7 +267,7 @@ class _NumberPageState extends State<NumberPage> {
                                 )
                               ),
                               const SizedBox(height: 15),
-                              
+                              // Text box for flight number input with a controller to read and process it.
                               Center(
                               child: SizedBox(
                                 width: 280,
@@ -309,10 +291,8 @@ class _NumberPageState extends State<NumberPage> {
                                 ),
                               ),
                             ),
-
                               const SizedBox(height:20),
-
-                              // Submit button
+                              // Submit button.
                               Center(
                                 child: TextButton(
                                   onPressed: () {
@@ -340,7 +320,7 @@ class _NumberPageState extends State<NumberPage> {
                     ),
                   ),
                 ),
-                // Ad pinned to bottom.
+                // Ad pinned to very bottom.
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _isAdLoaded == false

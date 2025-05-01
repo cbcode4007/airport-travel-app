@@ -2,35 +2,44 @@
   Author:      Colin Bond
   File:        passport.dart
   
-  Description: This file provides a hub and convenient display for users, presenting them with
-               a timer until their flight begins departing, time in their device's local area,
-               an explicit priority status informed by the background color which is checked
-               and switched accordingly every second, and finally a passport upload field 
-               for display with icons that allow for replacement or deletion.
-               Above this, there are two buttons, one backing out to the previous screen so
-               that a new flight number can be entered and another toggling a page where the user can
-               view their flight details instead, making it easily visible alongside their priority info.
+  Description: This file provides users an opportunity to upload their passport for later display. It features
+               a tappable area near the center which will remain so even after a passport is uploaded and
+               displayed to promote swift updating of it when necessary. Additionally, icons to delete
+               the passport and also navigate to the next screen will only show up if there is a file
+               path registered within the app.
 */
 
 // Imported dependency packages.
+
+// Dart language native libraries.
 // Future class for asynchronous updating.
 import 'dart:async';
-// Platform detection.
+// File work.
 import 'dart:io';
-// Route to the next screen.
-import 'package:airport_travel_app/screen/number.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
-// Dynamic advertisement banners.
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-// Image uploading and display across page visits.
+
+// Firebase suite for seamless authentication.
+// Allow the user to log out.
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Image related packages.
+// Select images from gallery.
 import 'package:image_picker/image_picker.dart';
+// File pathing logic to persist selected image across different page visits.
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // Image placeholder area.
 import 'package:dotted_border/dotted_border.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
+
+// Dynamic advertisement banners.
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+// Routes to the other screens.
+// Flight number entry page.
+import 'package:airport_travel_app/screen/number.dart';
+// Authentication page for redirection after logout.
 import 'auth_gate.dart';
 
 // This class is the configuration for the state. It holds the values (in this
@@ -41,7 +50,6 @@ class PassportPage extends StatefulWidget {
   const PassportPage({
     super.key,
   });
-
 
   @override
   State<PassportPage> createState() => _PassportPageState();
@@ -61,7 +69,7 @@ class _PassportPageState extends State<PassportPage> {
   // Declare to-be image file for the user passport.
   File? passportImage;
 
-  // Load the page including certain external libraries needing initialization (timezones and mobile ads).
+  // Load the page including a previously selected image path if there is one found and an ad instance for the page.
   @override
   void initState() {
     super.initState();
@@ -174,7 +182,7 @@ class _PassportPageState extends State<PassportPage> {
     }
   }
 
-  // Pop up a confirmation for logging out.
+  // Pop up a visually striking confirmation before logging out.
   Future<void> confirmLogout() async {
     return showDialog<void>(
       context: context,
@@ -209,12 +217,10 @@ class _PassportPageState extends State<PassportPage> {
     );
   }
 
-  // Navigate back to the first or Welcome page.
+  // Navigate back to the first page which will let the user re-authenticate.
   void _logOut() async {
     try {
-      print('Signing out...');
       await FirebaseAuth.instance.signOut();
-      print('Sign out successful.');
 
       if (!mounted) {
         return;
@@ -267,18 +273,11 @@ class _PassportPageState extends State<PassportPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Top icons.
+                        // Top row of icons.
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Back button to log out of account and be able to log in again.
-                            // IconButton(
-                            //   onPressed: confirmLogout,
-                            //   icon: const Icon(Icons.logout),
-                            //   color: Colors.white,
-                            //   iconSize: 50,
-                            // ),
-
+                            // Button to log out of account and be able to log in again.
                             IconButton(
                               icon: const Icon(Icons.logout),
                               iconSize: 50,
@@ -286,14 +285,14 @@ class _PassportPageState extends State<PassportPage> {
                               tooltip: 'Sign Out',
                               onPressed: confirmLogout
                             )
-
                           ],
                         ),
-                        // Timer heading & priority info.
+                        // Main layout of the screen.                         
                         Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              // Headings conveying step number, a welcoming message, and instructions for this step.
                               const Text (
                                 'Step 1 of 3',
                                 style: TextStyle(
@@ -319,6 +318,7 @@ class _PassportPageState extends State<PassportPage> {
                                 ),
                               ),
                               const SizedBox(height: 20),
+                              // Passport selection and display area.
                               GestureDetector(
                                 onTap: pickAndSaveImage,
                                 child: passportImage != null
@@ -355,7 +355,8 @@ class _PassportPageState extends State<PassportPage> {
                                   ),
                               ),
                               const SizedBox(height: 10),
-                              // Upload or view passport zone, depending on the current state of the variable to hold it.
+                              // Bottom row of icons, with delete passport and next step.
+                              // There must be a passport entry for the ability to delete it or move forward.
                               passportImage != null
                               ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -383,7 +384,7 @@ class _PassportPageState extends State<PassportPage> {
                     ),
                   ),
                 ),
-                // Ad pinned to bottom.
+                // Ad pinned to very bottom.
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _isAdLoaded == false

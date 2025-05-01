@@ -2,39 +2,54 @@
   Author:      Colin Bond
   File:        detail.dart
   
-  Description: This file provides a hub and convenient display for users, presenting them with
-               a timer until their flight begins departing, time in their device's local area,
-               an explicit priority status informed by the background color which is checked
-               and switched accordingly every second, and finally details about the flight.
-               Above this, there are two buttons, one backing out to the previous screen so
-               that a new flight number can be entered and another toggling a page where the user can
-               upload their passport for in-app display as well as delete it instead,
-               making it easily visible alongside their priority info.
+  Description: This file provides a convenient main page for users after setup, presenting them with:
+               - A timer until their flight begins departing.
+               - A background colour indicating priority status (>1h30m red, >45m yellow, 45m-0m1s green, >1s black).
+               - An explicit priority status informed by the background color. Both are checked
+                 and switched accordingly every second.
+               - A passport icon that can be clicked to expand the earlier uploaded passport image.
+               - A ticket display from the earlier uploaded ticket image that can be clicked to expand it.
+               - Some basic flight details without having to expand the ticket.
 */
 
 // Imported dependency packages.
+
+// Dart language native libraries.
 // Future class for asynchronous updating.
 import 'dart:async';
-// Platform detection.
+// File work.
 import 'dart:io';
-// Route to the next screen.
-import 'package:airport_travel_app/screen/ticket.dart';
-// Flight data.
-import 'package:airport_travel_app/model/flight.dart';
+
 // Material app design, or in other words Google standards for UI.
 import 'package:flutter/material.dart';
-// Open Sans Font.
-import 'package:google_fonts/google_fonts.dart';
-// Date manipulation.
-import 'package:intl/intl.dart';
-// Timezone logic for correct displays.
-import 'package:timezone/data/latest.dart' as tz;
+
+// Firebase suite for seamless authentication.
+// Allow the user to log out.
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Date manipulation logic for correct displays.
+// Timezone database and an aware version of the usual DateTime that takes different timezones into account.
 import 'package:timezone/timezone.dart' as tz;
+// Conversion and simplification of various timezones.
 import 'package:instant/instant.dart';
-// Dynamic advertisement banners.
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+// Results formatting for adoption into UI.
+import 'package:intl/intl.dart';
+
 // Passport and ticket displays.
 import 'package:photo_view/photo_view.dart';
+
+// Dynamic advertisement banners.
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+// Flight data.
+import 'package:airport_travel_app/model/flight.dart';
+
+// Route to the other screens.
+// Route to the previous screen to reupload a ticket or even something from earlier during setup.
+import 'package:airport_travel_app/screen/ticket.dart';
+// Authentication page for redirection after logout.
+import 'package:airport_travel_app/screen/auth_gate.dart';
+
 
 // This class is the configuration for the state. It holds the values (in this
 // case the title and flight) provided by the parent (in this case the App widget) and
@@ -82,11 +97,10 @@ class _DetailPageState extends State<DetailPage> {
   // Initialize the background colour which changes at certain times.
   Color? _color = Colors.red[400];
 
-  // Load the page including certain external libraries needing initialization (timezones and mobile ads).
+  // Load the page and an ad instance for it.
   @override
   void initState() {
     super.initState();
-    tz.initializeTimeZones();
     initialVariables();
     startTimer();
     updatePage();
@@ -247,16 +261,69 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
+  // Pop up a visually striking confirmation before logging out.
+  Future<void> confirmLogout() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to log out?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logOut();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Navigate back to the first page which will let the user re-authenticate.
+  void _logOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+
+      if (!mounted) {
+        return;
+      }
+      else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AuthGate(),
+          )
+        );
+      }
+
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      print('Sign out error: $e');
+    }
+  }
+
   @override
   void dispose() {
     _clockTimer.cancel();
     super.dispose();
   }
-
-  // Navigate back to the first or Welcome page.
-  // void _welcomePage() {
-  //   Navigator.pushReplacementNamed(context, '/');
-  // }
 
   // Navigate to the third or Passport page.
   void _ticketPage() {
@@ -285,34 +352,43 @@ class _DetailPageState extends State<DetailPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Top icons.
+                        // Top row of icons.
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Back button to enter another flight IATA.
+                            // Back button to return to ticket selection.
                             IconButton(
                               onPressed: _ticketPage,
                               icon: const Icon(Icons.arrow_back),
                               color: Colors.white,
                               iconSize: 50,
-                            ),
-                            // Passport button to add a passport image to view in the app.
+                            ),                            
+                            // Passport button to move the uploaded passport image to front and allow zooming.
                             IconButton(
                               onPressed: expandPassport,
                               icon: const Icon(Icons.badge),
                               color: Colors.white,
                               iconSize: 50,
                             ),
+                            // Button to log out of account and be able to log in again.
+                            IconButton(
+                              icon: const Icon(Icons.logout),
+                              iconSize: 50,
+                              color: Colors.white,
+                              tooltip: 'Sign Out',
+                              onPressed: confirmLogout
+                            ),
                           ],
-                        ),
-                        // Timer heading & priority info.
+                        ),                        
+                        // Main layout of the screen.
                         Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              // Headings conveying the timer and priority status.
                               Text(
                                 departTimer,
-                                style: GoogleFonts.openSans(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 50,
                                   fontWeight: FontWeight.bold,
@@ -321,10 +397,11 @@ class _DetailPageState extends State<DetailPage> {
                               ),
                               Text(
                                 priority,
-                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                style: const TextStyle(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 25),
+                              // Ticket preview which can also move the uploaded image to front and allow zooming.
                               GestureDetector(
                                 onTap: expandTicket,
                                 child: Padding(
@@ -338,14 +415,15 @@ class _DetailPageState extends State<DetailPage> {
                                 ),
                               ),
                               const SizedBox(height: 25),
+                              // Headings conveying the flight details below.
                               Text(
                                 'Flight Details for ${widget.flight.flightIata}',
-                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                style: const TextStyle(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
                               Text(
                                 '($date)',
-                                style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                style: const TextStyle(color: Colors.white, fontSize: 15),
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 5),
@@ -364,12 +442,12 @@ class _DetailPageState extends State<DetailPage> {
                                   const Icon(Icons.flight_takeoff, color: Colors.white, size: 50),
                                   Text(
                                     '$departTime $departCode',
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    style: const TextStyle(color: Colors.white, fontSize: 15),
                                     textAlign: TextAlign.center,
                                   ),
                                   Text(
                                     widget.flight.departNumber,
-                                    style: GoogleFonts.openSans(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 25,
                                       fontWeight: FontWeight.bold,
@@ -381,7 +459,7 @@ class _DetailPageState extends State<DetailPage> {
                                     maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    style: const TextStyle(color: Colors.white, fontSize: 15),
                                   ),
                                 ],
                               ),
@@ -394,12 +472,12 @@ class _DetailPageState extends State<DetailPage> {
                                   const Icon(Icons.flight_land, color: Colors.white, size: 50),
                                   Text(
                                     '$arriveTime $arriveCode',
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    style: const TextStyle(color: Colors.white, fontSize: 15),
                                     textAlign: TextAlign.center,
                                   ),
                                   Text(
                                     widget.flight.arriveNumber,
-                                    style: GoogleFonts.openSans(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 25,
                                       fontWeight: FontWeight.bold,
@@ -411,7 +489,7 @@ class _DetailPageState extends State<DetailPage> {
                                     maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.openSans(color: Colors.white, fontSize: 15),
+                                    style: const TextStyle(color: Colors.white, fontSize: 15),
                                   ),
                                 ],
                               ),
@@ -422,7 +500,7 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                   ),
                 ),
-                // Ad pinned to bottom.
+                // Ad pinned to very bottom.
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _isAdLoaded == false
